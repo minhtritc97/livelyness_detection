@@ -3,4 +3,5 @@ enum LivelynessStep {
   turnLeft,
   turnRight,
   smile,
+  lookStraight,
 }

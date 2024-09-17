@@ -75,20 +75,17 @@ class LivelynessDetection {
   /// Parameters: -
   /// * context: - Positional Parameter that will accept a `BuildContext` using which it will redirect the a new screen.
   /// * config: - Accepts a `DetectionConfig` object which will hold all the setup config of the package.
-  Future<CapturedImage?> detectLivelyness(
+  Future<List<CapturedImage?>> detectLivelyness(
     BuildContext context, {
     required DetectionConfig config,
   }) async {
     _safeAreaPadding = MediaQuery.of(context).padding;
-    final CapturedImage? capturedFacePath = await Navigator.of(context).push(
+    final List<CapturedImage?> capturedFacePath =
+        await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => Platform.isIOS
-            ? LivelynessDetectionScreenV1(
-                config: config,
-              )
-            : LivelynessDetectionPageV2(
-                config: config,
-              ),
+        builder: (context) => LivelynessDetectionPageV2(
+          config: config,
+        ),
       ),
     );
     return capturedFacePath;

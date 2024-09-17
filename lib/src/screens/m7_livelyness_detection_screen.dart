@@ -437,6 +437,7 @@ class _MLivelyness7DetectionScreenState
           await _completeStep(step: step);
         }
         break;
+      case LivelynessStep.lookStraight:
     }
   }
 

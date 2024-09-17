@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:livelyness_detection/index.dart';
 
+import '../core/enums/face_status.dart';
+
 class LivelynessDetectionPageV2 extends StatelessWidget {
   final DetectionConfig config;
 
@@ -46,7 +48,7 @@ class _LivelynessDetectionScreenAndroidState
     enableTracking: true,
     enableLandmarks: true,
     performanceMode: FaceDetectorMode.accurate,
-    minFaceSize: 0.05,
+    minFaceSize: 0.1,
   );
   late final faceDetector = FaceDetector(options: options);
   bool _didCloseEyes = false;
@@ -62,7 +64,7 @@ class _LivelynessDetectionScreenAndroidState
   Timer? _timerToDetectFace;
   bool _isCaptureButtonVisible = false;
   bool _isCompleted = false;
-
+  FaceStatus _faceStatus = FaceStatus.unknown;
   //* MARK: - Life Cycle Methods
   //? =========================================================
   @override
@@ -113,8 +115,8 @@ class _LivelynessDetectionScreenAndroidState
     final inputImage = img.toInputImage();
 
     try {
-      final List<Face> detectedFaces =
-          await faceDetector.processImage(inputImage);
+      final detectedFaces = await faceDetector.processImage(inputImage);
+
       _faceDetectionController.add(
         FaceDetectionModel(
           faces: detectedFaces,
@@ -142,8 +144,14 @@ class _LivelynessDetectionScreenAndroidState
 
   Future<void> _processImage(InputImage img, List<Face> faces) async {
     try {
-      if (faces.isEmpty) {
-        _resetSteps();
+      // if (faces.isEmpty) {
+      //   _resetSteps();
+      //   return;
+      // }
+      _faceStatus = FaceStatus.unknown;
+
+      if (faces.length > 1) {
+        _faceStatus = FaceStatus.unknown;
         return;
       }
       final Face firstFace = faces.first;
@@ -194,6 +202,15 @@ class _LivelynessDetectionScreenAndroidState
         total += value;
       });
       final double average = total / symmetry.length;
+      if (average > 260) {
+        _faceStatus = FaceStatus.near;
+      }
+      if (average < 200) {
+        _faceStatus = FaceStatus.far;
+      }
+      if (average >= 200 && average <= 260) {
+        _faceStatus = FaceStatus.normal;
+      }
       if (kDebugMode) {
         print("Face Symmetry: $average");
       }
@@ -218,9 +235,26 @@ class _LivelynessDetectionScreenAndroidState
     }
   }
 
+  List<String?> imgPaths = [];
+  LivelynessStep? currentStep;
   Future<void> _completeStep({
     required LivelynessStep step,
   }) async {
+    if (step != currentStep) {
+      _cameraState?.when(
+        onPhotoMode: (p0) => Future.delayed(
+          const Duration(milliseconds: 500),
+          () => p0.takePhoto().then(
+            (value) {
+              if (value.path != null) imgPaths.add(value.path);
+              print('take photo $step');
+            },
+          ),
+        ),
+      );
+    }
+    currentStep = step;
+
     final int indexToUpdate = _steps.indexWhere(
       (p0) => p0.step == step,
     );
@@ -232,6 +266,7 @@ class _LivelynessDetectionScreenAndroidState
       setState(() {});
     }
     await _stepsKey.currentState?.nextPage();
+
     _stopProcessing();
   }
 
@@ -242,7 +277,8 @@ class _LivelynessDetectionScreenAndroidState
     switch (step) {
       case LivelynessStep.blink:
         const double blinkThreshold = 0.25;
-        if ((face.leftEyeOpenProbability ?? 1.0) < (blinkThreshold) &&
+        if (_isLookingStraight(face) &&
+            (face.leftEyeOpenProbability ?? 1.0) < (blinkThreshold) &&
             (face.rightEyeOpenProbability ?? 1.0) < (blinkThreshold)) {
           _startProcessing();
           if (mounted) {
@@ -267,13 +303,29 @@ class _LivelynessDetectionScreenAndroidState
         }
         break;
       case LivelynessStep.smile:
-        const double smileThreshold = 0.75;
-        if ((face.smilingProbability ?? 0) > (smileThreshold)) {
+        const double smileThreshold = 0.1;
+        if (_isLookingStraight(face) &&
+            (face.smilingProbability ?? 0) > (smileThreshold)) {
+          _startProcessing();
+          await _completeStep(step: step);
+        }
+      case LivelynessStep.lookStraight:
+        if (_isLookingStraight(face)) {
           _startProcessing();
           await _completeStep(step: step);
         }
         break;
     }
+  }
+
+  Point<int> left = const Point(0, 0);
+  Point<int> right = const Point(0, 0);
+  bool _isLookingStraight(Face face) {
+    return _faceStatus == FaceStatus.normal &&
+        (face.headEulerAngleY ?? 0) <= 2 &&
+        (face.headEulerAngleY ?? 0) >= -2 &&
+        (face.headEulerAngleX ?? 0) <= 2 &&
+        (face.headEulerAngleX ?? 0) >= -2;
   }
 
   void _startProcessing() {
@@ -343,6 +395,7 @@ class _LivelynessDetectionScreenAndroidState
     if (_isCompleted) {
       return;
     }
+
     setState(
       () => _isCompleted = true,
     );
@@ -352,10 +405,20 @@ class _LivelynessDetectionScreenAndroidState
       return;
     }
     Navigator.of(context).pop(
-      CapturedImage(
-        imgPath: imgPath,
-        didCaptureAutomatically: didCaptureAutomatically,
-      ),
+      imgPaths.map(
+        (path) {
+          if (path?.isNotEmpty ?? false) {
+            return CapturedImage(
+              imgPath: path!,
+              didCaptureAutomatically: didCaptureAutomatically,
+            );
+          }
+        },
+      ).toList(),
+      // CapturedImage(
+      //   imgPath: imgPath,
+      //   didCaptureAutomatically: didCaptureAutomatically,
+      // ),
     );
   }
 
@@ -387,11 +450,9 @@ class _LivelynessDetectionScreenAndroidState
       children: [
         _isInfoStepCompleted
             ? CameraAwesomeBuilder.custom(
-                // flashMode: FlashMode.auto,
-                previewFit: CameraPreviewFit.contain,
-                // aspectRatio: CameraAspectRatios.ratio_16_9,
+                previewFit: CameraPreviewFit.fitWidth,
                 sensorConfig: SensorConfig.single(
-                  aspectRatio: CameraAspectRatios.ratio_16_9,
+                  aspectRatio: CameraAspectRatios.ratio_4_3,
                   flashMode: FlashMode.auto,
                   sensor: Sensor.position(SensorPosition.front),
                 ),
@@ -518,17 +579,37 @@ class _LivelynessDetectionScreenAndroidState
             ),
           ),
         ),
+        Positioned.fromRect(
+            rect: Rect.fromLTRB(
+                (MediaQuery.sizeOf(context).width - 230) / 2,
+                (MediaQuery.sizeOf(context).height - 300) / 2,
+                MediaQuery.sizeOf(context).width -
+                    ((MediaQuery.sizeOf(context).width - 230) / 2),
+                MediaQuery.sizeOf(context).height -
+                    ((MediaQuery.sizeOf(context).height - 300) / 2)),
+            child: Container(
+              decoration: const ShapeDecoration(
+                  color: Colors.transparent,
+                  shape: OvalBorder(side: BorderSide(color: Colors.white))),
+            )),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Text(
+            _faceStatus.text,
+            style: const TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ),
       ],
     );
   }
 
+  bool center = false;
   double calculateSymmetry(
       Point<int>? leftPosition, Point<int>? rightPosition) {
     if (leftPosition != null && rightPosition != null) {
       final double dx = (rightPosition.x - leftPosition.x).abs().toDouble();
       final double dy = (rightPosition.y - leftPosition.y).abs().toDouble();
       final distance = Offset(dx, dy).distance;
-
       return distance;
     }
 
