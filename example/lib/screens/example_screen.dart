@@ -13,7 +13,7 @@ class ExampleScreen extends StatefulWidget {
 class _ExampleScreenState extends State<ExampleScreen> {
   //* MARK: - Private Variables
   //? =========================================================
-  String? _capturedImagePath;
+  List<String?> _capturedImagePath = [];
   final bool _isLoading = false;
   bool _startWithInfo = true;
   bool _showFacialVertices = false;
@@ -42,6 +42,12 @@ class _ExampleScreenState extends State<ExampleScreen> {
   void _initValues() {
     _veificationSteps.addAll(
       [
+        LivelynessStepItem(
+          step: LivelynessStep.lookStraight,
+          title: "lookStraight",
+          isCompleted: false,
+          detectionColor: Colors.amber,
+        ),
         LivelynessStepItem(
           step: LivelynessStep.blink,
           title: "Blink",
@@ -77,8 +83,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
   }
 
   void _onStartLivelyness() async {
-    setState(() => _capturedImagePath = null);
-    final CapturedImage? response =
+    final List<CapturedImage?> response =
         await LivelynessDetection.instance.detectLivelyness(
       context,
       config: DetectionConfig(
@@ -90,11 +95,11 @@ class _ExampleScreenState extends State<ExampleScreen> {
         captureButtonColor: Colors.red,
       ),
     );
-    if (response == null) {
+    if (response.isEmpty) {
       return;
     }
     setState(
-      () => _capturedImagePath = response.imgPath,
+      () => _capturedImagePath = response.map((e) => e?.imgPath).toList(),
     );
   }
 
@@ -108,6 +113,8 @@ class _ExampleScreenState extends State<ExampleScreen> {
         return "Turn Your Head Right";
       case LivelynessStep.smile:
         return "Smile";
+      case LivelynessStep.lookStraight:
+        return "Look Straight";
     }
   }
 
@@ -121,6 +128,8 @@ class _ExampleScreenState extends State<ExampleScreen> {
         return "Detects Right Turn of the on the face visible in camera";
       case LivelynessStep.smile:
         return "Detects Smile on the face visible in camera";
+      case LivelynessStep.lookStraight:
+        return "Detects Straight Look on the face visible in camera";
     }
   }
 
@@ -204,17 +213,25 @@ class _ExampleScreenState extends State<ExampleScreen> {
           flex: 4,
         ),
         Visibility(
-          visible: _capturedImagePath != null,
+          visible: _capturedImagePath.isNotEmpty,
           child: Expanded(
             flex: 7,
-            child: Image.file(
-              File(_capturedImagePath ?? ""),
-              fit: BoxFit.contain,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                  children: _capturedImagePath
+                      .map(
+                        (e) => Image.file(
+                          File(e ?? ""),
+                          fit: BoxFit.contain,
+                        ),
+                      )
+                      .toList()),
             ),
           ),
         ),
         Visibility(
-          visible: _capturedImagePath != null,
+          visible: _capturedImagePath.isNotEmpty,
           child: const Spacer(),
         ),
         Center(
