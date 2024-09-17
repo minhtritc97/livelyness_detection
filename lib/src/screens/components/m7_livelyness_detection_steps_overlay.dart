@@ -53,7 +53,10 @@ class LivelynessDetectionStepOverlayState
           Visibility(
             visible: _isLoading,
             child: const Center(
-              child: CircularProgressIndicator.adaptive(),
+              child: CircularProgressIndicator(
+                backgroundColor: Colors.green,
+                color: Colors.lightGreen,
+              ),
             ),
           ),
         ],
