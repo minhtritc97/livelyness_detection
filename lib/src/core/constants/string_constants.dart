@@ -6,17 +6,20 @@ class StringConstants {
 }
 
 class _LabelStrings {
-  final String livelyNessDetection = "Livelyness Detection";
-  final String goodLighting = "Good Lighting";
-  final String lookStraight = "Look Straight";
+  final String livelyNessDetection = "Xác thực khuôn mặt";
+  final String goodLighting = "Đủ ánh sáng";
+  final String lookStraight = "Nhìn thẳng";
+  final String clearFace = "Rõ mặt";
   final String goodLightingSubText =
-      "Make sure you are in a well lit area and both ears are uncovered";
+      "Đảm bảo môi trường xung quanh có đủ ánh sáng tự nhiên hoặc đèn chiếu sáng để camera có thể thu nhận khuôn mặt một cách rõ nét. Tránh chụp trong bóng tối hoặc ánh sáng quá mạnh làm lóa hình ảnh";
   final String lookStraightSubText =
-      "Hold your phone at eye level and look straight to the camera";
+      "Để đảm bảo nhận diện chính xác, hãy giữ đầu thẳng và nhìn trực tiếp vào camera";
+  final String clearFaceSubText =
+      "Khuôn mặt cần được hiển thị rõ ràng, không che khuất bởi kính râm, khẩu trang, tóc hay bất kỳ vật dụng nào khác. Giữ khuôn mặt trong khung hình của camera";
   final String infoSubText =
-      "We use this selfie to compare with the mandatory photo(s) on the next step";
+      "Để thực hiện xác thực khuôn mặt trên điện thoại, vui lòng tuân thủ các yêu cầu sau";
 }
 
 class _ButtonStrings {
-  final String start = "Start!!!";
+  final String start = "Bắt đầu";
 }

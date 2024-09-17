@@ -119,6 +119,18 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
                         ),
                       ),
                     ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Center(
+                          child: _buildPointWidget(
+                            index: 3,
+                            title: StringConstants.label.clearFace,
+                            subTitle: StringConstants.label.clearFaceSubText,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
