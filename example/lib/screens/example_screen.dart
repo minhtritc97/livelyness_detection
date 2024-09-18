@@ -44,19 +44,19 @@ class _ExampleScreenState extends State<ExampleScreen> {
       [
         LivelynessStepItem(
           step: LivelynessStep.lookStraight,
-          title: "lookStraight",
+          title: "Nhìn thẳng",
           isCompleted: false,
           detectionColor: Colors.amber,
         ),
         LivelynessStepItem(
           step: LivelynessStep.blink,
-          title: "Blink",
+          title: "Nhìn thẳng và chớp mắt",
           isCompleted: false,
           detectionColor: Colors.amber,
         ),
         LivelynessStepItem(
           step: LivelynessStep.smile,
-          title: "Smile",
+          title: "Nhìn thẳng và cười",
           isCompleted: false,
           detectionColor: Colors.green.shade800,
         ),
@@ -106,15 +106,15 @@ class _ExampleScreenState extends State<ExampleScreen> {
   String _getTitle(LivelynessStep step) {
     switch (step) {
       case LivelynessStep.blink:
-        return "Blink";
+        return "Nhìn thẳng và chớp mắt";
       case LivelynessStep.turnLeft:
-        return "Turn Your Head Left";
+        return "Xoay trái";
       case LivelynessStep.turnRight:
-        return "Turn Your Head Right";
+        return "Xoay phải";
       case LivelynessStep.smile:
-        return "Smile";
+        return "Nhìn thẳng và cười";
       case LivelynessStep.lookStraight:
-        return "Look Straight";
+        return "Nhìn thẳng";
     }
   }
 

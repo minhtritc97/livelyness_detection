@@ -247,7 +247,6 @@ class _LivelynessDetectionScreenAndroidState
           () => p0.takePhoto().then(
             (value) {
               if (value.path != null) imgPaths.add(value.path);
-              print('take photo $step');
             },
           ),
         ),
@@ -289,18 +288,14 @@ class _LivelynessDetectionScreenAndroidState
         }
         break;
       case LivelynessStep.turnLeft:
-        const double headTurnThreshold = 45.0;
-        if ((face.headEulerAngleY ?? 0) > (headTurnThreshold)) {
-          _startProcessing();
-          await _completeStep(step: step);
-        }
+        Platform.isAndroid
+            ? await _checkTurnLeft(face, step)
+            : await _checkTurnRight(face, step);
         break;
       case LivelynessStep.turnRight:
-        const double headTurnThreshold = -50.0;
-        if ((face.headEulerAngleY ?? 0) < (headTurnThreshold)) {
-          _startProcessing();
-          await _completeStep(step: step);
-        }
+        Platform.isAndroid
+            ? await _checkTurnRight(face, step)
+            : await _checkTurnLeft(face, step);
         break;
       case LivelynessStep.smile:
         const double smileThreshold = 0.1;
@@ -318,14 +313,32 @@ class _LivelynessDetectionScreenAndroidState
     }
   }
 
+  Future<void> _checkTurnRight(Face face, LivelynessStep step) async {
+    const double headTurnThreshold = -35.0;
+    if ((face.headEulerAngleY ?? 0) < (headTurnThreshold)) {
+      _startProcessing();
+      await _completeStep(step: step);
+    }
+  }
+
+  Future<void> _checkTurnLeft(Face face, LivelynessStep step) async {
+    const double headTurnThreshold = 30.0;
+    if ((face.headEulerAngleY ?? 0) > (headTurnThreshold)) {
+      _startProcessing();
+      await _completeStep(step: step);
+    }
+  }
+
   Point<int> left = const Point(0, 0);
   Point<int> right = const Point(0, 0);
   bool _isLookingStraight(Face face) {
+    print(' headEulerAngleY ${face.headEulerAngleY}');
+    print('headEulerAngleX ${face.headEulerAngleX}');
+
     return _faceStatus == FaceStatus.normal &&
-        (face.headEulerAngleY ?? 0) <= 2 &&
-        (face.headEulerAngleY ?? 0) >= -2 &&
-        (face.headEulerAngleX ?? 0) <= 2 &&
-        (face.headEulerAngleX ?? 0) >= -2;
+        (face.headEulerAngleY ?? 0) <= 3 &&
+        (face.headEulerAngleY ?? 0) >= -3 &&
+        (face.headEulerAngleX ?? 0) <= 2;
   }
 
   void _startProcessing() {
@@ -451,6 +464,7 @@ class _LivelynessDetectionScreenAndroidState
         _isInfoStepCompleted
             ? CameraAwesomeBuilder.custom(
                 previewFit: CameraPreviewFit.fitWidth,
+                mirrorFrontCamera: true,
                 sensorConfig: SensorConfig.single(
                   aspectRatio: CameraAspectRatios.ratio_4_3,
                   flashMode: FlashMode.auto,

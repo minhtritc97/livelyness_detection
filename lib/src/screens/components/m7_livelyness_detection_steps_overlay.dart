@@ -82,12 +82,17 @@ class LivelynessDetectionStepOverlayState
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeIn,
       );
-      await Future.delayed(
-        const Duration(seconds: 2),
-      );
+      // await Future.delayed(
+      //   const Duration(seconds: 1),
+      // );
       _hideLoader();
       setState(() => _currentIndex++);
     } else {
+      _showLoader();
+      await Future.delayed(
+        const Duration(milliseconds: 500),
+      );
+      _hideLoader();
       widget.onCompleted();
     }
   }
@@ -169,14 +174,14 @@ class LivelynessDetectionStepOverlayState
                         ],
                       ),
                       alignment: Alignment.center,
-                      margin: const EdgeInsets.symmetric(horizontal: 30),
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
                       padding: const EdgeInsets.all(10),
                       child: Text(
                         widget.steps[index].title,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: Colors.black,
-                          fontSize: 24,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

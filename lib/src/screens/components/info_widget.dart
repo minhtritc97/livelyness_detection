@@ -30,9 +30,7 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Spacer(
-            flex: 2,
-          ),
+          const SizedBox(height: 60),
           Text(
             StringConstants.label.livelyNessDetection,
             textAlign: TextAlign.center,
@@ -42,7 +40,6 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
               fontSize: 22,
             ),
           ),
-          const Spacer(),
           Text(
             StringConstants.label.infoSubText,
             textAlign: TextAlign.center,
@@ -53,24 +50,20 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
               height: 1.5,
             ),
           ),
-          Expanded(
-            flex: 3,
-            child: Center(
-              child: Container(
-                color: Colors.transparent,
-                child: Lottie.asset(
-                  AssetConstants.lottie.livelynessStart,
-                  package: AssetConstants.packageName,
-                  animate: true,
-                  repeat: true,
-                  reverse: false,
-                  fit: BoxFit.contain,
-                ),
-              ),
+          Container(
+            width: 120,
+            height: 120,
+            color: Colors.transparent,
+            child: Lottie.asset(
+              AssetConstants.lottie.livelynessStart,
+              package: AssetConstants.packageName,
+              animate: true,
+              repeat: true,
+              reverse: false,
+              fit: BoxFit.contain,
             ),
           ),
           Expanded(
-            flex: 5,
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 40,
@@ -87,28 +80,21 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
                     ),
                   ],
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Expanded(
-                      child: Padding(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      Padding(
                         padding: const EdgeInsets.all(20),
                         child: Center(
-                          child: Container(
-                            child: _buildPointWidget(
-                              index: 1,
-                              title: StringConstants.label.goodLighting,
-                              subTitle:
-                                  StringConstants.label.goodLightingSubText,
-                            ),
+                          child: _buildPointWidget(
+                            index: 1,
+                            title: StringConstants.label.goodLighting,
+                            subTitle: StringConstants.label.goodLightingSubText,
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Padding(
+                      Padding(
                         padding: const EdgeInsets.all(20),
                         child: Center(
                           child: _buildPointWidget(
@@ -118,9 +104,7 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Padding(
+                      Padding(
                         padding: const EdgeInsets.all(20),
                         child: Center(
                           child: _buildPointWidget(
@@ -130,8 +114,8 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -156,13 +140,12 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
                 StringConstants.button.start,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 24,
-                ),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 24,
+                    color: Colors.green),
               ),
             ),
           ),
-          const Spacer(),
         ],
       ),
     );
@@ -198,39 +181,31 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                flex: 5,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    title,
-                    textAlign: TextAlign.start,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  title,
+                  textAlign: TextAlign.start,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
                   ),
                 ),
               ),
               // const Spacer(),
-              Expanded(
-                flex: 10,
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    subTitle,
-                    textAlign: TextAlign.start,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.blueGrey,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 14,
-                      height: 1.5,
-                    ),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  subTitle,
+                  textAlign: TextAlign.start,
+                  style: const TextStyle(
+                    color: Colors.blueGrey,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 14,
+                    height: 1.5,
                   ),
                 ),
               ),
