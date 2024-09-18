@@ -120,9 +120,7 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
               ),
             ),
           ),
-          const SizedBox(
-            height: 25,
-          ),
+          const SizedBox(height: 25),
           Center(
             child: ElevatedButton(
               onPressed: () => widget.onStartTap(),
@@ -146,6 +144,7 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
               ),
             ),
           ),
+          const SizedBox(height: 25),
         ],
       ),
     );
