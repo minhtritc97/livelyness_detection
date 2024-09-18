@@ -332,9 +332,6 @@ class _LivelynessDetectionScreenAndroidState
   Point<int> left = const Point(0, 0);
   Point<int> right = const Point(0, 0);
   bool _isLookingStraight(Face face) {
-    print(' headEulerAngleY ${face.headEulerAngleY}');
-    print('headEulerAngleX ${face.headEulerAngleX}');
-
     return _faceStatus == FaceStatus.normal &&
         (face.headEulerAngleY ?? 0) <= 3 &&
         (face.headEulerAngleY ?? 0) >= -3 &&
@@ -435,23 +432,23 @@ class _LivelynessDetectionScreenAndroidState
     );
   }
 
-  void _resetSteps() async {
-    for (var p0 in _steps) {
-      final int index = _steps.indexWhere(
-        (p1) => p1.step == p0.step,
-      );
-      _steps[index] = _steps[index].copyWith(
-        isCompleted: false,
-      );
-    }
-    _didCloseEyes = false;
-    if (_stepsKey.currentState?.currentIndex != 0) {
-      _stepsKey.currentState?.reset();
-    }
-    if (mounted) {
-      setState(() {});
-    }
-  }
+  // void _resetSteps() async {
+  //   for (var p0 in _steps) {
+  //     final int index = _steps.indexWhere(
+  //       (p1) => p1.step == p0.step,
+  //     );
+  //     _steps[index] = _steps[index].copyWith(
+  //       isCompleted: false,
+  //     );
+  //   }
+  //   _didCloseEyes = false;
+  //   if (_stepsKey.currentState?.currentIndex != 0) {
+  //     _stepsKey.currentState?.reset();
+  //   }
+  //   if (mounted) {
+  //     setState(() {});
+  //   }
+  // }
 
   //* MARK: - Private Methods for UI Components
   //? =========================================================
