@@ -202,13 +202,13 @@ class _LivelynessDetectionScreenAndroidState
         total += value;
       });
       final double average = total / symmetry.length;
-      if (average > 180) {
+      if (average > 160) {
         _faceStatus = FaceStatus.near;
       }
-      if (average < 160) {
+      if (average < 140) {
         _faceStatus = FaceStatus.far;
       }
-      if (average >= 160 && average <= 180) {
+      if (average >= 140 && average <= 160) {
         _faceStatus = FaceStatus.normal;
       }
       if (kDebugMode) {
@@ -460,7 +460,7 @@ class _LivelynessDetectionScreenAndroidState
       children: [
         _isInfoStepCompleted
             ? CameraAwesomeBuilder.custom(
-                previewFit: CameraPreviewFit.fitWidth,
+                previewFit: CameraPreviewFit.contain,
                 mirrorFrontCamera: true,
                 sensorConfig: SensorConfig.single(
                   aspectRatio: CameraAspectRatios.ratio_4_3,
@@ -470,9 +470,6 @@ class _LivelynessDetectionScreenAndroidState
                 onImageForAnalysis: (img) => _processCameraImage(img),
                 imageAnalysisConfig: AnalysisConfig(
                   autoStart: true,
-                  androidOptions: const AndroidAnalysisOptions.nv21(
-                    width: 250,
-                  ),
                   maxFramesPerSecond: 30,
                 ),
                 builder: (state, preview) {
