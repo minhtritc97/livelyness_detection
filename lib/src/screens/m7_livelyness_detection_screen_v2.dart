@@ -202,13 +202,13 @@ class _LivelynessDetectionScreenAndroidState
         total += value;
       });
       final double average = total / symmetry.length;
-      if (average > 260) {
+      if (average > 190) {
         _faceStatus = FaceStatus.near;
       }
-      if (average < 200) {
+      if (average < 170) {
         _faceStatus = FaceStatus.far;
       }
-      if (average >= 200 && average <= 260) {
+      if (average >= 170 && average <= 190) {
         _faceStatus = FaceStatus.normal;
       }
       if (kDebugMode) {
@@ -592,12 +592,12 @@ class _LivelynessDetectionScreenAndroidState
         ),
         Positioned.fromRect(
             rect: Rect.fromLTRB(
-                (MediaQuery.sizeOf(context).width - 230) / 2,
-                (MediaQuery.sizeOf(context).height - 300) / 2,
+                (MediaQuery.sizeOf(context).width - 180) / 2,
+                (MediaQuery.sizeOf(context).height - 250) / 2,
                 MediaQuery.sizeOf(context).width -
-                    ((MediaQuery.sizeOf(context).width - 230) / 2),
+                    ((MediaQuery.sizeOf(context).width - 180) / 2),
                 MediaQuery.sizeOf(context).height -
-                    ((MediaQuery.sizeOf(context).height - 300) / 2)),
+                    ((MediaQuery.sizeOf(context).height - 250) / 2)),
             child: Container(
               decoration: const ShapeDecoration(
                   color: Colors.transparent,
