@@ -202,13 +202,13 @@ class _LivelynessDetectionScreenAndroidState
         total += value;
       });
       final double average = total / symmetry.length;
-      if (average > 190) {
+      if (average > 210) {
         _faceStatus = FaceStatus.near;
       }
       if (average < 170) {
         _faceStatus = FaceStatus.far;
       }
-      if (average >= 170 && average <= 190) {
+      if (average >= 170 && average <= 210) {
         _faceStatus = FaceStatus.normal;
       }
       if (kDebugMode) {
