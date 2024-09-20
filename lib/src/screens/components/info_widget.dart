@@ -22,6 +22,7 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
     return Container(
       height: double.infinity,
       width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: const BoxDecoration(
         color: Colors.white,
       ),

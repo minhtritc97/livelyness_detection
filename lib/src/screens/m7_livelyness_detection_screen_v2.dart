@@ -587,19 +587,6 @@ class _LivelynessDetectionScreenAndroidState
             ),
           ),
         ),
-        Positioned.fromRect(
-            rect: Rect.fromLTRB(
-                (MediaQuery.sizeOf(context).width - 180) / 2,
-                (MediaQuery.sizeOf(context).height - 250) / 2,
-                MediaQuery.sizeOf(context).width -
-                    ((MediaQuery.sizeOf(context).width - 180) / 2),
-                MediaQuery.sizeOf(context).height -
-                    ((MediaQuery.sizeOf(context).height - 250) / 2)),
-            child: Container(
-              decoration: const ShapeDecoration(
-                  color: Colors.transparent,
-                  shape: OvalBorder(side: BorderSide(color: Colors.white))),
-            )),
         Align(
           alignment: Alignment.bottomCenter,
           child: Text(
