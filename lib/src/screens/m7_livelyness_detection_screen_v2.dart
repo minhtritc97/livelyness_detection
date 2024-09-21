@@ -64,6 +64,8 @@ class _LivelynessDetectionScreenAndroidState
   Timer? _timerToDetectFace;
   bool _isCaptureButtonVisible = false;
   bool _isCompleted = false;
+  List<String?> imgPaths = [];
+  LivelynessStep? lastCompletedStep;
   //* MARK: - Life Cycle Methods
   //? =========================================================
   @override
@@ -265,12 +267,10 @@ class _LivelynessDetectionScreenAndroidState
     }
   }
 
-  List<String?> imgPaths = [];
-  LivelynessStep? currentStep;
   Future<void> _completeStep({
     required LivelynessStep step,
   }) async {
-    if (step != currentStep) {
+    if (step != lastCompletedStep) {
       _cameraState?.when(
         onPhotoMode: (p0) => Future.delayed(
           const Duration(milliseconds: 500),
@@ -282,7 +282,7 @@ class _LivelynessDetectionScreenAndroidState
         ),
       );
     }
-    currentStep = step;
+    lastCompletedStep = step;
 
     final int indexToUpdate = _steps.indexWhere(
       (p0) => p0.step == step,
@@ -654,7 +654,11 @@ class _LivelynessDetectionScreenAndroidState
                 width: MediaQuery.sizeOf(context).height * 0.28,
               ),
             ),
-          if (_faceStatusList.contains(FaceStatus.up))
+          if (_faceStatusList.contains(FaceStatus.up) &&
+              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
+                  LivelynessStep.turnLeft &&
+              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
+                  LivelynessStep.turnRight)
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
@@ -677,7 +681,11 @@ class _LivelynessDetectionScreenAndroidState
                 ),
               ),
             ),
-          if (_faceStatusList.contains(FaceStatus.down))
+          if (_faceStatusList.contains(FaceStatus.down) &&
+              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
+                  LivelynessStep.turnLeft &&
+              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
+                  LivelynessStep.turnRight)
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
@@ -700,7 +708,11 @@ class _LivelynessDetectionScreenAndroidState
                 ),
               ),
             ),
-          if (_faceStatusList.contains(FaceStatus.right))
+          if (_faceStatusList.contains(FaceStatus.right) &&
+              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
+                  LivelynessStep.turnLeft &&
+              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
+                  LivelynessStep.turnRight)
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
@@ -724,7 +736,11 @@ class _LivelynessDetectionScreenAndroidState
                 ),
               ),
             ),
-          if (_faceStatusList.contains(FaceStatus.left))
+          if (_faceStatusList.contains(FaceStatus.left) &&
+              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
+                  LivelynessStep.turnLeft &&
+              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
+                  LivelynessStep.turnRight)
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
