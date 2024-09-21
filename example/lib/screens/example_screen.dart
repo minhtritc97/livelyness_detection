@@ -44,19 +44,19 @@ class _ExampleScreenState extends State<ExampleScreen> {
       [
         LivelynessStepItem(
           step: LivelynessStep.lookStraight,
-          title: "Nhìn thẳng",
+          title: "Vui lòng nhìn thẳng",
           isCompleted: false,
           detectionColor: Colors.amber,
         ),
         LivelynessStepItem(
           step: LivelynessStep.blink,
-          title: "Nhìn thẳng và chớp mắt",
+          title: "Vui lòng nhìn thẳng và chớp mắt",
           isCompleted: false,
           detectionColor: Colors.amber,
         ),
         LivelynessStepItem(
           step: LivelynessStep.smile,
-          title: "Nhìn thẳng và cười",
+          title: "Vui lòng nhìn thẳng và cười",
           isCompleted: false,
           detectionColor: Colors.green.shade800,
         ),
@@ -106,15 +106,15 @@ class _ExampleScreenState extends State<ExampleScreen> {
   String _getTitle(LivelynessStep step) {
     switch (step) {
       case LivelynessStep.blink:
-        return "Nhìn thẳng và chớp mắt";
+        return "Vui lòng nhìn thẳng và chớp mắt";
       case LivelynessStep.turnLeft:
-        return "Xoay trái";
+        return "Vui lòng xoay trái";
       case LivelynessStep.turnRight:
-        return "Xoay phải";
+        return "Vui lòng xoay phải";
       case LivelynessStep.smile:
-        return "Nhìn thẳng và cười";
+        return "Vui lòng nhìn thẳng và cười";
       case LivelynessStep.lookStraight:
-        return "Nhìn thẳng";
+        return "Vui lòng nhìn thẳng";
     }
   }
 
@@ -215,7 +215,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
         Visibility(
           visible: _capturedImagePath.isNotEmpty,
           child: Expanded(
-            flex: 7,
+            flex: 14,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
