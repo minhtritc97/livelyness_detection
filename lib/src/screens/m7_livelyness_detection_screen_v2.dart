@@ -48,7 +48,7 @@ class _LivelynessDetectionScreenAndroidState
     enableTracking: true,
     enableLandmarks: true,
     performanceMode: FaceDetectorMode.accurate,
-    minFaceSize: 0.1,
+    minFaceSize: 0.8,
   );
   late final faceDetector = FaceDetector(options: options);
   bool _didCloseEyes = false;
@@ -64,7 +64,6 @@ class _LivelynessDetectionScreenAndroidState
   Timer? _timerToDetectFace;
   bool _isCaptureButtonVisible = false;
   bool _isCompleted = false;
-  FaceStatus _faceStatus = FaceStatus.unknown;
   //* MARK: - Life Cycle Methods
   //? =========================================================
   @override
@@ -142,16 +141,16 @@ class _LivelynessDetectionScreenAndroidState
     }
   }
 
+  final List<FaceStatus> _faceStatusList = [];
   Future<void> _processImage(InputImage img, List<Face> faces) async {
     try {
       // if (faces.isEmpty) {
       //   _resetSteps();
       //   return;
       // }
-      _faceStatus = FaceStatus.unknown;
+      _faceStatusList.clear();
 
       if (faces.length > 1) {
-        _faceStatus = FaceStatus.unknown;
         return;
       }
       final Face firstFace = faces.first;
@@ -202,14 +201,45 @@ class _LivelynessDetectionScreenAndroidState
         total += value;
       });
       final double average = total / symmetry.length;
-      if (average > 210) {
-        _faceStatus = FaceStatus.near;
+      if (average > 250) {
+        if (!_faceStatusList.contains(FaceStatus.near)) {
+          _faceStatusList.add(FaceStatus.near);
+          _faceStatusList.remove(FaceStatus.far);
+        }
       }
-      if (average < 170) {
-        _faceStatus = FaceStatus.far;
+      if (average < 200) {
+        if (!_faceStatusList.contains(FaceStatus.far)) {
+          _faceStatusList.add(FaceStatus.far);
+          _faceStatusList.remove(FaceStatus.near);
+        }
       }
-      if (average >= 170 && average <= 210) {
-        _faceStatus = FaceStatus.normal;
+      if (average >= 200 && average <= 250) {
+        _faceStatusList.remove(FaceStatus.far);
+        _faceStatusList.remove(FaceStatus.near);
+      }
+      if ((firstFace.headEulerAngleX ?? 0) > 3) {
+        if (!_faceStatusList.contains(FaceStatus.up)) {
+          _faceStatusList.add(FaceStatus.up);
+          _faceStatusList.remove(FaceStatus.down);
+        }
+      }
+      if ((firstFace.headEulerAngleX ?? 0) < -3) {
+        if (!_faceStatusList.contains(FaceStatus.down)) {
+          _faceStatusList.add(FaceStatus.down);
+          _faceStatusList.remove(FaceStatus.up);
+        }
+      }
+      if ((firstFace.headEulerAngleY ?? 0) > 3) {
+        if (!_faceStatusList.contains(FaceStatus.left)) {
+          _faceStatusList.add(FaceStatus.left);
+          _faceStatusList.remove(FaceStatus.right);
+        }
+      }
+      if ((firstFace.headEulerAngleY ?? 0) < -3) {
+        if (!_faceStatusList.contains(FaceStatus.right)) {
+          _faceStatusList.add(FaceStatus.right);
+          _faceStatusList.remove(FaceStatus.left);
+        }
       }
       if (kDebugMode) {
         print("Face Symmetry: $average");
@@ -332,10 +362,12 @@ class _LivelynessDetectionScreenAndroidState
   Point<int> left = const Point(0, 0);
   Point<int> right = const Point(0, 0);
   bool _isLookingStraight(Face face) {
-    return _faceStatus == FaceStatus.normal &&
+    return !_faceStatusList.contains(FaceStatus.near) &&
+        !_faceStatusList.contains(FaceStatus.far) &&
         (face.headEulerAngleY ?? 0) <= 3 &&
         (face.headEulerAngleY ?? 0) >= -3 &&
-        (face.headEulerAngleX ?? 0) <= 2;
+        (face.headEulerAngleX ?? 0) <= 3 &&
+        (face.headEulerAngleX ?? 0) >= -3;
   }
 
   void _startProcessing() {
@@ -454,147 +486,289 @@ class _LivelynessDetectionScreenAndroidState
   //? =========================================================
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      alignment: Alignment.center,
-      children: [
-        _isInfoStepCompleted
-            ? CameraAwesomeBuilder.custom(
-                previewFit: CameraPreviewFit.contain,
-                mirrorFrontCamera: true,
-                sensorConfig: SensorConfig.single(
-                  aspectRatio: CameraAspectRatios.ratio_4_3,
-                  flashMode: FlashMode.auto,
-                  sensor: Sensor.position(SensorPosition.front),
-                ),
-                onImageForAnalysis: (img) => _processCameraImage(img),
-                imageAnalysisConfig: AnalysisConfig(
-                  autoStart: true,
-                  maxFramesPerSecond: 30,
-                ),
-                builder: (state, preview) {
-                  _cameraState = state;
-                  return widget.config.showFacialVertices
-                      ? PreviewDecoratorWidget(
-                          cameraState: state,
-                          faceDetectionStream: _faceDetectionController,
-                          previewSize: PreviewSize(
-                            width: preview.previewSize.width,
-                            height: preview.previewSize.height,
+    return Container(
+      decoration: BoxDecoration(
+          gradient: LinearGradient(
+        colors: [
+          const Color.fromARGB(255, 6, 22, 29),
+          Colors.blueGrey.shade800,
+          const Color.fromARGB(255, 6, 22, 29),
+        ],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      )),
+      child: Stack(
+        fit: StackFit.expand,
+        alignment: Alignment.center,
+        children: [
+          _isInfoStepCompleted
+              ? Align(
+                  alignment: Alignment.center,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        constraints: BoxConstraints(
+                            maxHeight: MediaQuery.sizeOf(context).height * 0.5),
+                        child: CameraAwesomeBuilder.custom(
+                          previewFit: CameraPreviewFit.fitWidth,
+                          mirrorFrontCamera: true,
+                          sensorConfig: SensorConfig.single(
+                            aspectRatio: CameraAspectRatios.ratio_4_3,
+                            flashMode: FlashMode.auto,
+                            sensor: Sensor.position(SensorPosition.front),
                           ),
-                          previewRect: preview.rect,
-                        )
-                      : const SizedBox();
-                },
-                // (state, previewSize, previewRect) {
-                //   _cameraState = state;
-                //   return PreviewDecoratorWidget(
-                //     cameraState: state,
-                //     faceDetectionStream: _faceDetectionController,
-                //     previewSize: previewSize,
-                //     previewRect: previewRect,
-                //     detectionColor:
-                //         _steps[_stepsKey.currentState?.currentIndex ?? 0]
-                //             .detectionColor,
-                //   );
-                // },
-                saveConfig: SaveConfig.photo(
-                  pathBuilder: (_) async {
-                    final String fileName = "${Utils.generate()}.jpg";
-                    final String path = await getTemporaryDirectory().then(
-                      (value) => value.path,
-                    );
-                    // return "$path/$fileName";
-                    return SingleCaptureRequest(
-                      "$path/$fileName",
-                      Sensor.position(
-                        SensorPosition.front,
+                          onImageForAnalysis: (img) => _processCameraImage(img),
+                          imageAnalysisConfig: AnalysisConfig(
+                            autoStart: true,
+                            maxFramesPerSecond: 30,
+                          ),
+                          builder: (state, preview) {
+                            _cameraState = state;
+                            return widget.config.showFacialVertices
+                                ? PreviewDecoratorWidget(
+                                    cameraState: state,
+                                    faceDetectionStream:
+                                        _faceDetectionController,
+                                    previewSize: PreviewSize(
+                                      width: preview.previewSize.width,
+                                      height: preview.previewSize.height,
+                                    ),
+                                    previewRect: preview.rect,
+                                  )
+                                : const SizedBox();
+                          },
+                          // (state, previewSize, previewRect) {
+                          //   _cameraState = state;
+                          //   return PreviewDecoratorWidget(
+                          //     cameraState: state,
+                          //     faceDetectionStream: _faceDetectionController,
+                          //     previewSize: previewSize,
+                          //     previewRect: previewRect,
+                          //     detectionColor:
+                          //         _steps[_stepsKey.currentState?.currentIndex ?? 0]
+                          //             .detectionColor,
+                          //   );
+                          // },
+                          saveConfig: SaveConfig.photo(
+                            pathBuilder: (_) async {
+                              final String fileName = "${Utils.generate()}.jpg";
+                              final String path =
+                                  await getTemporaryDirectory().then(
+                                (value) => value.path,
+                              );
+                              // return "$path/$fileName";
+                              return SingleCaptureRequest(
+                                "$path/$fileName",
+                                Sensor.position(
+                                  SensorPosition.front,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                       ),
+                    ),
+                  ),
+                )
+              : LivelynessInfoWidget(
+                  onStartTap: () {
+                    if (!mounted) {
+                      return;
+                    }
+                    _startTimer();
+                    setState(
+                      () => _isInfoStepCompleted = true,
                     );
                   },
                 ),
-              )
-            : LivelynessInfoWidget(
-                onStartTap: () {
-                  if (!mounted) {
-                    return;
-                  }
-                  _startTimer();
-                  setState(
-                    () => _isInfoStepCompleted = true,
-                  );
-                },
+          if (_isInfoStepCompleted)
+            LivelynessDetectionStepOverlay(
+              key: _stepsKey,
+              steps: _steps,
+              onCompleted: () => _takePicture(
+                didCaptureAutomatically: true,
               ),
-        if (_isInfoStepCompleted)
-          LivelynessDetectionStepOverlay(
-            key: _stepsKey,
-            steps: _steps,
-            onCompleted: () => _takePicture(
-              didCaptureAutomatically: true,
+            ),
+          Visibility(
+            visible: _isCaptureButtonVisible,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Spacer(
+                  flex: 20,
+                ),
+                MaterialButton(
+                  onPressed: () => _takePicture(
+                    didCaptureAutomatically: false,
+                  ),
+                  color: widget.config.captureButtonColor ??
+                      Theme.of(context).primaryColor,
+                  textColor: Colors.white,
+                  padding: const EdgeInsets.all(16),
+                  shape: const CircleBorder(),
+                  child: const Icon(
+                    Icons.camera_alt,
+                    size: 24,
+                  ),
+                ),
+                const Spacer(),
+              ],
             ),
           ),
-        Visibility(
-          visible: _isCaptureButtonVisible,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Spacer(
-                flex: 20,
+          Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                right: 10,
+                top: 10,
               ),
-              MaterialButton(
-                onPressed: () => _takePicture(
-                  didCaptureAutomatically: false,
-                ),
-                color: widget.config.captureButtonColor ??
-                    Theme.of(context).primaryColor,
-                textColor: Colors.white,
-                padding: const EdgeInsets.all(16),
-                shape: const CircleBorder(),
-                child: const Icon(
-                  Icons.camera_alt,
-                  size: 24,
-                ),
-              ),
-              const Spacer(),
-            ],
-          ),
-        ),
-        Align(
-          alignment: Alignment.topRight,
-          child: Padding(
-            padding: const EdgeInsets.only(
-              right: 10,
-              top: 10,
-            ),
-            child: CircleAvatar(
-              radius: 20,
-              backgroundColor: Colors.black,
-              child: IconButton(
-                onPressed: () {
-                  _onDetectionCompleted(
-                    imgToReturn: null,
-                    didCaptureAutomatically: null,
-                  );
-                },
-                icon: const Icon(
-                  Icons.close_rounded,
-                  size: 20,
-                  color: Colors.white,
+              child: CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.black,
+                child: IconButton(
+                  onPressed: () {
+                    _onDetectionCompleted(
+                      imgToReturn: null,
+                      didCaptureAutomatically: null,
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    size: 20,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Text(
-            _faceStatus.text,
-            style: const TextStyle(color: Colors.white, fontSize: 20),
-          ),
-        ),
-      ],
+          if (_isInfoStepCompleted)
+            Align(
+              alignment: Alignment.center,
+              child: Image.asset(
+                AssetConstants.images.scanView,
+                package: AssetConstants.packageName,
+                width: MediaQuery.sizeOf(context).height * 0.28,
+              ),
+            ),
+          if (_faceStatusList.contains(FaceStatus.up))
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Icon(Icons.face, color: Colors.green),
+                    Lottie.asset(
+                      AssetConstants.lottie.arrowDown,
+                      package: AssetConstants.packageName,
+                      animate: true,
+                      repeat: true,
+                      reverse: false,
+                      fit: BoxFit.contain,
+                      width: 40,
+                      height: 40,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (_faceStatusList.contains(FaceStatus.down))
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Icon(Icons.face, color: Colors.green),
+                    Lottie.asset(
+                      AssetConstants.lottie.arrowUp,
+                      package: AssetConstants.packageName,
+                      animate: true,
+                      repeat: true,
+                      reverse: false,
+                      fit: BoxFit.contain,
+                      width: 40,
+                      height: 40,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (_faceStatusList.contains(FaceStatus.right))
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Icon(Icons.face, color: Colors.green),
+                    Lottie.asset(
+                      AssetConstants.lottie.arrowLeft,
+                      package: AssetConstants.packageName,
+                      animate: true,
+                      repeat: true,
+                      reverse: false,
+                      fit: BoxFit.contain,
+                      width: 40,
+                      height: 40,
+                    ),
+                    SizedBox(height: MediaQuery.sizeOf(context).height * 0.22),
+                  ],
+                ),
+              ),
+            ),
+          if (_faceStatusList.contains(FaceStatus.left))
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Icon(Icons.face, color: Colors.green),
+                    Lottie.asset(
+                      AssetConstants.lottie.arrowRight,
+                      package: AssetConstants.packageName,
+                      animate: true,
+                      repeat: true,
+                      reverse: false,
+                      fit: BoxFit.contain,
+                      width: 40,
+                      height: 40,
+                    ),
+                    SizedBox(height: MediaQuery.sizeOf(context).height * 0.22),
+                  ],
+                ),
+              ),
+            ),
+          if (_isInfoStepCompleted)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    _faceStatusList.contains(FaceStatus.far)
+                        ? FaceStatus.far.text
+                        : _faceStatusList.contains(FaceStatus.near)
+                            ? FaceStatus.near.text
+                            : 'Vui lòng giữ nguyên khoảng cách với camera',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+                  SizedBox(height: MediaQuery.sizeOf(context).height * 0.15),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 

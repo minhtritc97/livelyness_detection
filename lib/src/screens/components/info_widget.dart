@@ -22,7 +22,6 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
     return Container(
       height: double.infinity,
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: const BoxDecoration(
         color: Colors.white,
       ),
@@ -32,23 +31,29 @@ class _LivelynessInfoWidgetState extends State<LivelynessInfoWidget> {
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 60),
-          Text(
-            StringConstants.label.livelyNessDetection,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 22,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              StringConstants.label.livelyNessDetection,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+              ),
             ),
           ),
-          Text(
-            StringConstants.label.infoSubText,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.blueGrey,
-              fontWeight: FontWeight.normal,
-              fontSize: 18,
-              height: 1.5,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              StringConstants.label.infoSubText,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.blueGrey,
+                fontWeight: FontWeight.normal,
+                fontSize: 18,
+                height: 1.5,
+              ),
             ),
           ),
           Container(

@@ -52,10 +52,16 @@ class LivelynessDetectionStepOverlayState
           _buildBody(),
           Visibility(
             visible: _isLoading,
-            child: const Center(
-              child: CircularProgressIndicator(
-                backgroundColor: Colors.green,
-                color: Colors.lightGreen,
+            child: Center(
+              child: Lottie.asset(
+                AssetConstants.lottie.check,
+                package: AssetConstants.packageName,
+                animate: true,
+                repeat: false,
+                reverse: false,
+                fit: BoxFit.contain,
+                width: 40,
+                height: 40,
               ),
             ),
           ),
@@ -120,38 +126,8 @@ class LivelynessDetectionStepOverlayState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          height: 10,
-          width: double.infinity,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                flex: _currentIndex + 1,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                    ),
-                    color: Colors.green.shade800,
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: widget.steps.length - (_currentIndex + 1),
-                child: Container(
-                  color: Colors.transparent,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const Spacer(),
         Flexible(
-          flex: 2,
+          flex: 4,
           child: AbsorbPointer(
             absorbing: true,
             child: PageView.builder(
@@ -159,32 +135,16 @@ class LivelynessDetectionStepOverlayState
               itemCount: widget.steps.length,
               itemBuilder: (context, index) {
                 return _buildAnimatedWidget(
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: const [
-                          BoxShadow(
-                            blurRadius: 5,
-                            spreadRadius: 2.5,
-                            color: Colors.black12,
-                          ),
-                        ],
-                      ),
-                      alignment: Alignment.center,
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        widget.steps[index].title,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.black,
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Text(
+                      widget.steps[index].title,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.yellow[200],
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                          fontWeight: FontWeight.w500,
+                          fontStyle: FontStyle.italic),
                     ),
                   ),
                   isExiting: index != _currentIndex,
@@ -193,9 +153,55 @@ class LivelynessDetectionStepOverlayState
             ),
           ),
         ),
-        const Spacer(
-          flex: 14,
+        const Spacer(flex: 14),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(60, 60, 60, 0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.grey,
+              ),
+              height: 10,
+              width: double.infinity,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    flex: _currentIndex,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(20),
+                          bottomRight: Radius.circular(20),
+                        ),
+                        gradient: LinearGradient(
+                            colors: [Colors.green.shade800, Colors.lightGreen]),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: widget.steps.length - (_currentIndex),
+                    child: Container(
+                      color: Colors.transparent,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
+        Center(
+          child: Text(
+            '${(((_currentIndex) / widget.steps.length) * 100).toStringAsFixed(0)}% Xác thực',
+            style: const TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16)
       ],
     );
   }
