@@ -506,68 +506,99 @@ class _LivelynessDetectionScreenAndroidState
                   alignment: Alignment.center,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        constraints: BoxConstraints(
-                            maxHeight: MediaQuery.sizeOf(context).height * 0.5),
-                        child: CameraAwesomeBuilder.custom(
-                          previewFit: CameraPreviewFit.fitWidth,
-                          mirrorFrontCamera: true,
-                          sensorConfig: SensorConfig.single(
-                            aspectRatio: CameraAspectRatios.ratio_4_3,
-                            flashMode: FlashMode.auto,
-                            sensor: Sensor.position(SensorPosition.front),
-                          ),
-                          onImageForAnalysis: (img) => _processCameraImage(img),
-                          imageAnalysisConfig: AnalysisConfig(
-                            autoStart: true,
-                            maxFramesPerSecond: 30,
-                          ),
-                          builder: (state, preview) {
-                            _cameraState = state;
-                            return widget.config.showFacialVertices
-                                ? PreviewDecoratorWidget(
-                                    cameraState: state,
-                                    faceDetectionStream:
-                                        _faceDetectionController,
-                                    previewSize: PreviewSize(
-                                      width: preview.previewSize.width,
-                                      height: preview.previewSize.height,
-                                    ),
-                                    previewRect: preview.rect,
-                                  )
-                                : const SizedBox();
-                          },
-                          // (state, previewSize, previewRect) {
-                          //   _cameraState = state;
-                          //   return PreviewDecoratorWidget(
-                          //     cameraState: state,
-                          //     faceDetectionStream: _faceDetectionController,
-                          //     previewSize: previewSize,
-                          //     previewRect: previewRect,
-                          //     detectionColor:
-                          //         _steps[_stepsKey.currentState?.currentIndex ?? 0]
-                          //             .detectionColor,
-                          //   );
-                          // },
-                          saveConfig: SaveConfig.photo(
-                            pathBuilder: (_) async {
-                              final String fileName = "${Utils.generate()}.jpg";
-                              final String path =
-                                  await getTemporaryDirectory().then(
-                                (value) => value.path,
-                              );
-                              // return "$path/$fileName";
-                              return SingleCaptureRequest(
-                                "$path/$fileName",
-                                Sensor.position(
-                                  SensorPosition.front,
+                    child: Container(
+                      constraints: BoxConstraints(
+                          maxWidth: MediaQuery.sizeOf(context).width),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            constraints: BoxConstraints(
+                                maxHeight:
+                                    MediaQuery.sizeOf(context).height * 0.65),
+                            child: AspectRatio(
+                              aspectRatio: 9 / 16,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: CameraAwesomeBuilder.custom(
+                                  previewFit: CameraPreviewFit.contain,
+                                  mirrorFrontCamera: true,
+                                  sensorConfig: SensorConfig.single(
+                                    aspectRatio: CameraAspectRatios.ratio_16_9,
+                                    flashMode: FlashMode.auto,
+                                    sensor:
+                                        Sensor.position(SensorPosition.front),
+                                  ),
+                                  onImageForAnalysis: (img) =>
+                                      _processCameraImage(img),
+                                  imageAnalysisConfig: AnalysisConfig(
+                                    autoStart: true,
+                                    maxFramesPerSecond: 30,
+                                  ),
+                                  builder: (state, preview) {
+                                    _cameraState = state;
+                                    return widget.config.showFacialVertices
+                                        ? PreviewDecoratorWidget(
+                                            cameraState: state,
+                                            faceDetectionStream:
+                                                _faceDetectionController,
+                                            previewSize: PreviewSize(
+                                              width: preview.previewSize.width,
+                                              height:
+                                                  preview.previewSize.height,
+                                            ),
+                                            previewRect: preview.rect,
+                                          )
+                                        : const SizedBox();
+                                  },
+                                  // (state, previewSize, previewRect) {
+                                  //   _cameraState = state;
+                                  //   return PreviewDecoratorWidget(
+                                  //     cameraState: state,
+                                  //     faceDetectionStream: _faceDetectionController,
+                                  //     previewSize: previewSize,
+                                  //     previewRect: previewRect,
+                                  //     detectionColor:
+                                  //         _steps[_stepsKey.currentState?.currentIndex ?? 0]
+                                  //             .detectionColor,
+                                  //   );
+                                  // },
+                                  saveConfig: SaveConfig.photo(
+                                    pathBuilder: (_) async {
+                                      final String fileName =
+                                          "${Utils.generate()}.jpg";
+                                      final String path =
+                                          await getTemporaryDirectory().then(
+                                        (value) => value.path,
+                                      );
+                                      // return "$path/$fileName";
+                                      return SingleCaptureRequest(
+                                        "$path/$fileName",
+                                        Sensor.position(
+                                          SensorPosition.front,
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
-                              );
-                            },
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 4),
+                          SizedBox(
+                            height: 80,
+                            child: Text(
+                              _faceStatusList.contains(FaceStatus.far)
+                                  ? FaceStatus.far.text
+                                  : _faceStatusList.contains(FaceStatus.near)
+                                      ? FaceStatus.near.text
+                                      : 'Vui lòng giữ nguyên khoảng cách với camera',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 20),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -722,7 +753,9 @@ class _LivelynessDetectionScreenAndroidState
                   children: [
                     const Icon(Icons.face, color: Colors.green),
                     Lottie.asset(
-                      AssetConstants.lottie.arrowLeft,
+                      Platform.isAndroid
+                          ? AssetConstants.lottie.arrowLeft
+                          : AssetConstants.lottie.arrowRight,
                       package: AssetConstants.packageName,
                       animate: true,
                       repeat: true,
@@ -750,7 +783,9 @@ class _LivelynessDetectionScreenAndroidState
                   children: [
                     const Icon(Icons.face, color: Colors.green),
                     Lottie.asset(
-                      AssetConstants.lottie.arrowRight,
+                      Platform.isAndroid
+                          ? AssetConstants.lottie.arrowRight
+                          : AssetConstants.lottie.arrowLeft,
                       package: AssetConstants.packageName,
                       animate: true,
                       repeat: true,
@@ -762,25 +797,6 @@ class _LivelynessDetectionScreenAndroidState
                     SizedBox(height: MediaQuery.sizeOf(context).height * 0.22),
                   ],
                 ),
-              ),
-            ),
-          if (_isInfoStepCompleted)
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    _faceStatusList.contains(FaceStatus.far)
-                        ? FaceStatus.far.text
-                        : _faceStatusList.contains(FaceStatus.near)
-                            ? FaceStatus.near.text
-                            : 'Vui lòng giữ nguyên khoảng cách với camera',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white, fontSize: 20),
-                  ),
-                  SizedBox(height: MediaQuery.sizeOf(context).height * 0.15),
-                ],
               ),
             ),
         ],

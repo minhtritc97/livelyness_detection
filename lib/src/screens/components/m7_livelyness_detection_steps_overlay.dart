@@ -136,15 +136,21 @@ class LivelynessDetectionStepOverlayState
               itemBuilder: (context, index) {
                 return _buildAnimatedWidget(
                   Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Text(
-                      widget.steps[index].title,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: Colors.yellow[200],
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
-                          fontStyle: FontStyle.italic),
+                    alignment: Alignment.center,
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        child: Text(
+                          widget.steps[index].title,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              color: Colors.green,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              fontStyle: FontStyle.italic),
+                        ),
+                      ),
                     ),
                   ),
                   isExiting: index != _currentIndex,
