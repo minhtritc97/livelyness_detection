@@ -14,6 +14,10 @@ class _ImageAssets {
   String get mesh {
     return "$_initPath/final-mesh.png";
   }
+
+  String get scanView {
+    return "$_initPath/qr_scan_view.png";
+  }
 }
 
 class _LottieAssets {
@@ -31,5 +35,25 @@ class _LottieAssets {
 
   String get stepCompleted {
     return "$_initPath/step_completed.json";
+  }
+
+  String get arrowUp {
+    return "$_initPath/arrow_up.json";
+  }
+
+  String get arrowDown {
+    return "$_initPath/arrow_down.json";
+  }
+
+  String get arrowLeft {
+    return "$_initPath/arrow_left.json";
+  }
+
+  String get arrowRight {
+    return "$_initPath/arrow_right.json";
+  }
+
+  String get check {
+    return "$_initPath/check.json";
   }
 }

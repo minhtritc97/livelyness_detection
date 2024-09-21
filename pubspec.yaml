@@ -39,6 +39,12 @@ flutter:
     - packages/livelyness_detection/src/assets/lottie/livelyness-start.json
     - packages/livelyness_detection/src/assets/lottie/livelyness-success.json
     - packages/livelyness_detection/src/assets/lottie/step_completed.json
+    - packages/livelyness_detection/src/assets/lottie/arrow_down.json
+    - packages/livelyness_detection/src/assets/lottie/arrow_up.json
+    - packages/livelyness_detection/src/assets/lottie/arrow_left.json
+    - packages/livelyness_detection/src/assets/lottie/arrow_right.json
+    - packages/livelyness_detection/src/assets/lottie/check.json
+    - packages/livelyness_detection/src/assets/qr_scan_view.png
     - packages/livelyness_detection/src/assets/final-mesh.png
   # For details regarding assets in packages, see
   # https://flutter.dev/assets-and-images/#from-packages

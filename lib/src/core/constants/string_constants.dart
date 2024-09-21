@@ -15,7 +15,7 @@ class _LabelStrings {
   final String lookStraightSubText =
       "Để đảm bảo nhận diện chính xác, hãy giữ đầu thẳng và nhìn trực tiếp vào camera";
   final String clearFaceSubText =
-      "Khuôn mặt cần được hiển thị rõ ràng, không che khuất bởi kính râm, khẩu trang, tóc hay bất kỳ vật dụng nào khác. Giữ khuôn mặt trong khung hình của camera";
+      "Khuôn mặt cần được hiển thị rõ ràng, không che khuất bởi kính râm, khẩu trang, tóc hay bất kỳ vật dụng nào khác. Tránh có nhiều khuôn mặt trong lúc xác thực";
   final String infoSubText =
       "Để thực hiện xác thực khuôn mặt trên điện thoại, vui lòng tuân thủ các yêu cầu sau";
 }
