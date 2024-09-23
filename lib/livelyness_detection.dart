@@ -82,12 +82,13 @@ class LivelynessDetection {
     _safeAreaPadding = MediaQuery.of(context).padding;
     final List<CapturedImage?> capturedFacePath =
         await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => LivelynessDetectionPageV2(
-          config: config,
-        ),
-      ),
-    );
+              MaterialPageRoute(
+                builder: (context) => LivelynessDetectionPageV2(
+                  config: config,
+                ),
+              ),
+            ) ??
+            [];
     return capturedFacePath;
   }
 
