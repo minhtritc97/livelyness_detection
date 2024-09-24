@@ -536,7 +536,7 @@ class _LivelynessDetectionScreenAndroidState
                                           _processCameraImage(img),
                                       imageAnalysisConfig: AnalysisConfig(
                                         autoStart: true,
-                                        maxFramesPerSecond: 30,
+                                        maxFramesPerSecond: 10,
                                       ),
                                       builder: (state, preview) {
                                         _cameraState = state;
