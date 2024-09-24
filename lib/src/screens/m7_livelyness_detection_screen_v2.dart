@@ -520,66 +520,229 @@ class _LivelynessDetectionScreenAndroidState
                               aspectRatio: 9 / 16,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
-                                child: CameraAwesomeBuilder.custom(
-                                  previewFit: CameraPreviewFit.contain,
-                                  mirrorFrontCamera: true,
-                                  sensorConfig: SensorConfig.single(
-                                    aspectRatio: CameraAspectRatios.ratio_16_9,
-                                    flashMode: FlashMode.auto,
-                                    sensor:
-                                        Sensor.position(SensorPosition.front),
-                                  ),
-                                  onImageForAnalysis: (img) =>
-                                      _processCameraImage(img),
-                                  imageAnalysisConfig: AnalysisConfig(
-                                    autoStart: true,
-                                    maxFramesPerSecond: 30,
-                                  ),
-                                  builder: (state, preview) {
-                                    _cameraState = state;
-                                    return widget.config.showFacialVertices
-                                        ? PreviewDecoratorWidget(
-                                            cameraState: state,
-                                            faceDetectionStream:
-                                                _faceDetectionController,
-                                            previewSize: PreviewSize(
-                                              width: preview.previewSize.width,
-                                              height:
-                                                  preview.previewSize.height,
+                                child: Stack(
+                                  children: [
+                                    CameraAwesomeBuilder.custom(
+                                      previewFit: CameraPreviewFit.contain,
+                                      mirrorFrontCamera: true,
+                                      sensorConfig: SensorConfig.single(
+                                        aspectRatio:
+                                            CameraAspectRatios.ratio_16_9,
+                                        flashMode: FlashMode.auto,
+                                        sensor: Sensor.position(
+                                            SensorPosition.front),
+                                      ),
+                                      onImageForAnalysis: (img) =>
+                                          _processCameraImage(img),
+                                      imageAnalysisConfig: AnalysisConfig(
+                                        autoStart: true,
+                                        maxFramesPerSecond: 30,
+                                      ),
+                                      builder: (state, preview) {
+                                        _cameraState = state;
+                                        return widget.config.showFacialVertices
+                                            ? PreviewDecoratorWidget(
+                                                cameraState: state,
+                                                faceDetectionStream:
+                                                    _faceDetectionController,
+                                                previewSize: PreviewSize(
+                                                  width:
+                                                      preview.previewSize.width,
+                                                  height: preview
+                                                      .previewSize.height,
+                                                ),
+                                                previewRect: preview.rect,
+                                              )
+                                            : const SizedBox();
+                                      },
+                                      // (state, previewSize, previewRect) {
+                                      //   _cameraState = state;
+                                      //   return PreviewDecoratorWidget(
+                                      //     cameraState: state,
+                                      //     faceDetectionStream: _faceDetectionController,
+                                      //     previewSize: previewSize,
+                                      //     previewRect: previewRect,
+                                      //     detectionColor:
+                                      //         _steps[_stepsKey.currentState?.currentIndex ?? 0]
+                                      //             .detectionColor,
+                                      //   );
+                                      // },
+                                      saveConfig: SaveConfig.photo(
+                                        pathBuilder: (_) async {
+                                          final String fileName =
+                                              "${Utils.generate()}.jpg";
+                                          final String path =
+                                              await getTemporaryDirectory()
+                                                  .then(
+                                            (value) => value.path,
+                                          );
+                                          // return "$path/$fileName";
+                                          return SingleCaptureRequest(
+                                            "$path/$fileName",
+                                            Sensor.position(
+                                              SensorPosition.front,
                                             ),
-                                            previewRect: preview.rect,
-                                          )
-                                        : const SizedBox();
-                                  },
-                                  // (state, previewSize, previewRect) {
-                                  //   _cameraState = state;
-                                  //   return PreviewDecoratorWidget(
-                                  //     cameraState: state,
-                                  //     faceDetectionStream: _faceDetectionController,
-                                  //     previewSize: previewSize,
-                                  //     previewRect: previewRect,
-                                  //     detectionColor:
-                                  //         _steps[_stepsKey.currentState?.currentIndex ?? 0]
-                                  //             .detectionColor,
-                                  //   );
-                                  // },
-                                  saveConfig: SaveConfig.photo(
-                                    pathBuilder: (_) async {
-                                      final String fileName =
-                                          "${Utils.generate()}.jpg";
-                                      final String path =
-                                          await getTemporaryDirectory().then(
-                                        (value) => value.path,
-                                      );
-                                      // return "$path/$fileName";
-                                      return SingleCaptureRequest(
-                                        "$path/$fileName",
-                                        Sensor.position(
-                                          SensorPosition.front,
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    if (_faceStatusList
+                                            .contains(FaceStatus.up) &&
+                                        _steps[_stepsKey.currentState
+                                                        ?.currentIndex ??
+                                                    0]
+                                                .step !=
+                                            LivelynessStep.turnLeft &&
+                                        _steps[_stepsKey.currentState
+                                                        ?.currentIndex ??
+                                                    0]
+                                                .step !=
+                                            LivelynessStep.turnRight)
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              const Icon(Icons.face,
+                                                  color: Colors.green),
+                                              Lottie.asset(
+                                                AssetConstants.lottie.arrowDown,
+                                                package:
+                                                    AssetConstants.packageName,
+                                                animate: true,
+                                                repeat: true,
+                                                reverse: false,
+                                                fit: BoxFit.contain,
+                                                width: 40,
+                                                height: 40,
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                    if (_faceStatusList
+                                            .contains(FaceStatus.down) &&
+                                        _steps[_stepsKey.currentState
+                                                        ?.currentIndex ??
+                                                    0]
+                                                .step !=
+                                            LivelynessStep.turnLeft &&
+                                        _steps[_stepsKey.currentState
+                                                        ?.currentIndex ??
+                                                    0]
+                                                .step !=
+                                            LivelynessStep.turnRight)
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              const Icon(Icons.face,
+                                                  color: Colors.green),
+                                              Lottie.asset(
+                                                AssetConstants.lottie.arrowUp,
+                                                package:
+                                                    AssetConstants.packageName,
+                                                animate: true,
+                                                repeat: true,
+                                                reverse: false,
+                                                fit: BoxFit.contain,
+                                                width: 40,
+                                                height: 40,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    if (_faceStatusList
+                                            .contains(FaceStatus.right) &&
+                                        _steps[_stepsKey.currentState
+                                                        ?.currentIndex ??
+                                                    0]
+                                                .step !=
+                                            LivelynessStep.turnLeft &&
+                                        _steps[_stepsKey.currentState
+                                                        ?.currentIndex ??
+                                                    0]
+                                                .step !=
+                                            LivelynessStep.turnRight)
+                                      Align(
+                                        alignment: Alignment.bottomCenter,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              const Icon(Icons.face,
+                                                  color: Colors.green),
+                                              Lottie.asset(
+                                                Platform.isAndroid
+                                                    ? AssetConstants
+                                                        .lottie.arrowLeft
+                                                    : AssetConstants
+                                                        .lottie.arrowRight,
+                                                package:
+                                                    AssetConstants.packageName,
+                                                animate: true,
+                                                repeat: true,
+                                                reverse: false,
+                                                fit: BoxFit.contain,
+                                                width: 40,
+                                                height: 40,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    if (_faceStatusList
+                                            .contains(FaceStatus.left) &&
+                                        _steps[_stepsKey.currentState
+                                                        ?.currentIndex ??
+                                                    0]
+                                                .step !=
+                                            LivelynessStep.turnLeft &&
+                                        _steps[_stepsKey.currentState
+                                                        ?.currentIndex ??
+                                                    0]
+                                                .step !=
+                                            LivelynessStep.turnRight)
+                                      Align(
+                                        alignment: Alignment.bottomCenter,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              const Icon(Icons.face,
+                                                  color: Colors.green),
+                                              Lottie.asset(
+                                                Platform.isAndroid
+                                                    ? AssetConstants
+                                                        .lottie.arrowRight
+                                                    : AssetConstants
+                                                        .lottie.arrowLeft,
+                                                package:
+                                                    AssetConstants.packageName,
+                                                animate: true,
+                                                repeat: true,
+                                                reverse: false,
+                                                fit: BoxFit.contain,
+                                                width: 40,
+                                                height: 40,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -592,7 +755,10 @@ class _LivelynessDetectionScreenAndroidState
                                   ? FaceStatus.far.text
                                   : _faceStatusList.contains(FaceStatus.near)
                                       ? FaceStatus.near.text
-                                      : 'Vui lòng giữ nguyên khoảng cách với camera',
+                                      : _steps[_stepsKey
+                                                  .currentState?.currentIndex ??
+                                              0]
+                                          .title,
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                   color: Colors.white, fontSize: 20),
@@ -676,129 +842,15 @@ class _LivelynessDetectionScreenAndroidState
               ),
             ),
           ),
-          if (_isInfoStepCompleted)
-            Align(
-              alignment: Alignment.center,
-              child: Image.asset(
-                AssetConstants.images.scanView,
-                package: AssetConstants.packageName,
-                width: MediaQuery.sizeOf(context).height * 0.28,
-              ),
-            ),
-          if (_faceStatusList.contains(FaceStatus.up) &&
-              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
-                  LivelynessStep.turnLeft &&
-              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
-                  LivelynessStep.turnRight)
-            Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const Icon(Icons.face, color: Colors.green),
-                    Lottie.asset(
-                      AssetConstants.lottie.arrowDown,
-                      package: AssetConstants.packageName,
-                      animate: true,
-                      repeat: true,
-                      reverse: false,
-                      fit: BoxFit.contain,
-                      width: 40,
-                      height: 40,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          if (_faceStatusList.contains(FaceStatus.down) &&
-              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
-                  LivelynessStep.turnLeft &&
-              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
-                  LivelynessStep.turnRight)
-            Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const Icon(Icons.face, color: Colors.green),
-                    Lottie.asset(
-                      AssetConstants.lottie.arrowUp,
-                      package: AssetConstants.packageName,
-                      animate: true,
-                      repeat: true,
-                      reverse: false,
-                      fit: BoxFit.contain,
-                      width: 40,
-                      height: 40,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          if (_faceStatusList.contains(FaceStatus.right) &&
-              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
-                  LivelynessStep.turnLeft &&
-              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
-                  LivelynessStep.turnRight)
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const Icon(Icons.face, color: Colors.green),
-                    Lottie.asset(
-                      Platform.isAndroid
-                          ? AssetConstants.lottie.arrowLeft
-                          : AssetConstants.lottie.arrowRight,
-                      package: AssetConstants.packageName,
-                      animate: true,
-                      repeat: true,
-                      reverse: false,
-                      fit: BoxFit.contain,
-                      width: 40,
-                      height: 40,
-                    ),
-                    SizedBox(height: MediaQuery.sizeOf(context).height * 0.22),
-                  ],
-                ),
-              ),
-            ),
-          if (_faceStatusList.contains(FaceStatus.left) &&
-              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
-                  LivelynessStep.turnLeft &&
-              _steps[_stepsKey.currentState?.currentIndex ?? 0].step !=
-                  LivelynessStep.turnRight)
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const Icon(Icons.face, color: Colors.green),
-                    Lottie.asset(
-                      Platform.isAndroid
-                          ? AssetConstants.lottie.arrowRight
-                          : AssetConstants.lottie.arrowLeft,
-                      package: AssetConstants.packageName,
-                      animate: true,
-                      repeat: true,
-                      reverse: false,
-                      fit: BoxFit.contain,
-                      width: 40,
-                      height: 40,
-                    ),
-                    SizedBox(height: MediaQuery.sizeOf(context).height * 0.22),
-                  ],
-                ),
-              ),
-            ),
+          // if (_isInfoStepCompleted)
+          //   Align(
+          //     alignment: Alignment.center,
+          //     child: Image.asset(
+          //       AssetConstants.images.scanView,
+          //       package: AssetConstants.packageName,
+          //       width: MediaQuery.sizeOf(context).height * 0.28,
+          //     ),
+          //   ),
         ],
       ),
     );

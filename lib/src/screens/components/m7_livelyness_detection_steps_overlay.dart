@@ -84,10 +84,10 @@ class LivelynessDetectionStepOverlayState
           milliseconds: 500,
         ),
       );
-      await _pageController.nextPage(
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeIn,
-      );
+      // await _pageController.nextPage(
+      //   duration: const Duration(milliseconds: 500),
+      //   curve: Curves.easeIn,
+      // );
       // await Future.delayed(
       //   const Duration(seconds: 1),
       // );
@@ -126,39 +126,39 @@ class LivelynessDetectionStepOverlayState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Flexible(
-          flex: 4,
-          child: AbsorbPointer(
-            absorbing: true,
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: widget.steps.length,
-              itemBuilder: (context, index) {
-                return _buildAnimatedWidget(
-                  Align(
-                    alignment: Alignment.center,
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        child: Text(
-                          widget.steps[index].title,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: Colors.green,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w500,
-                              fontStyle: FontStyle.italic),
-                        ),
-                      ),
-                    ),
-                  ),
-                  isExiting: index != _currentIndex,
-                );
-              },
-            ),
-          ),
-        ),
+        // Flexible(
+        //   flex: 4,
+        //   child: AbsorbPointer(
+        //     absorbing: true,
+        //     child: PageView.builder(
+        //       controller: _pageController,
+        //       itemCount: widget.steps.length,
+        //       itemBuilder: (context, index) {
+        //         return _buildAnimatedWidget(
+        //           Align(
+        //             alignment: Alignment.center,
+        //             child: Card(
+        //               child: Padding(
+        //                 padding: const EdgeInsets.symmetric(
+        //                     horizontal: 8, vertical: 4),
+        //                 child: Text(
+        //                   widget.steps[index].title,
+        //                   textAlign: TextAlign.center,
+        //                   style: const TextStyle(
+        //                       color: Colors.green,
+        //                       fontSize: 20,
+        //                       fontWeight: FontWeight.w500,
+        //                       fontStyle: FontStyle.italic),
+        //                 ),
+        //               ),
+        //             ),
+        //           ),
+        //           isExiting: index != _currentIndex,
+        //         );
+        //       },
+        //     ),
+        //   ),
+        // ),
         const Spacer(flex: 14),
         Padding(
           padding: const EdgeInsets.fromLTRB(60, 60, 60, 0),
@@ -212,27 +212,27 @@ class LivelynessDetectionStepOverlayState
     );
   }
 
-  Widget _buildAnimatedWidget(
-    Widget child, {
-    required bool isExiting,
-  }) {
-    return isExiting
-        ? ZoomOut(
-            animate: true,
-            child: FadeOutLeft(
-              animate: true,
-              delay: const Duration(milliseconds: 200),
-              child: child,
-            ),
-          )
-        : ZoomIn(
-            animate: true,
-            delay: const Duration(milliseconds: 500),
-            child: FadeInRight(
-              animate: true,
-              delay: const Duration(milliseconds: 700),
-              child: child,
-            ),
-          );
-  }
+  // Widget _buildAnimatedWidget(
+  //   Widget child, {
+  //   required bool isExiting,
+  // }) {
+  //   return isExiting
+  //       ? ZoomOut(
+  //           animate: true,
+  //           child: FadeOutLeft(
+  //             animate: true,
+  //             delay: const Duration(milliseconds: 200),
+  //             child: child,
+  //           ),
+  //         )
+  //       : ZoomIn(
+  //           animate: true,
+  //           delay: const Duration(milliseconds: 500),
+  //           child: FadeInRight(
+  //             animate: true,
+  //             delay: const Duration(milliseconds: 700),
+  //             child: child,
+  //           ),
+  //         );
+  // }
 }
