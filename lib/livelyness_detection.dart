@@ -1,5 +1,4 @@
 import 'package:livelyness_detection/index.dart';
-import 'package:livelyness_detection/src/screens/m7_livelyness_detection_screen_v3.dart';
 export './src/index.dart';
 
 class LivelynessDetection {
@@ -84,7 +83,7 @@ class LivelynessDetection {
     final List<CapturedImage?> capturedFacePath =
         await Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => LivelynessDetectionPageV3(
+                builder: (context) => LivelynessDetectionPageV2(
                   config: config,
                 ),
               ),
