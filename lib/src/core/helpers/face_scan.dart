@@ -6,10 +6,10 @@ import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:livelyness_detection/src/core/extensions/nv21_converter.dart';
 
 class FaceIdentifier {
-  static Future<Face?> scanImage(
-      {required CameraImage cameraImage,
-      required CameraController? controller,
-      required FaceDetectorMode performanceMode}) async {
+  static Future<Face?> scanImage({
+    required CameraImage cameraImage,
+    required CameraController? controller,
+  }) async {
     final orientations = {
       DeviceOrientation.portraitUp: 0,
       DeviceOrientation.landscapeLeft: 90,
@@ -19,7 +19,6 @@ class FaceIdentifier {
 
     Face? result;
     final face = await _detectFace(
-        performanceMode: performanceMode,
         visionImage:
             _inputImageFromCameraImage(cameraImage, controller, orientations));
     if (face != null) {
@@ -88,14 +87,18 @@ class FaceIdentifier {
     );
   }
 
-  static Future<Face?> _detectFace(
-      {required InputImage? visionImage,
-      required FaceDetectorMode performanceMode}) async {
+  static Future<Face?> _detectFace({
+    required InputImage? visionImage,
+  }) async {
     if (visionImage == null) return null;
     final options = FaceDetectorOptions(
-        enableLandmarks: true,
-        enableTracking: true,
-        performanceMode: performanceMode);
+      enableContours: true,
+      enableClassification: true,
+      enableTracking: true,
+      enableLandmarks: true,
+      performanceMode: FaceDetectorMode.accurate,
+      minFaceSize: 0.8,
+    );
     final faceDetector = FaceDetector(options: options);
     try {
       final List<Face> faces = await faceDetector.processImage(visionImage);

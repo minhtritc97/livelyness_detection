@@ -149,9 +149,9 @@ class _LivelynessDetectionScreenAndroidState
 
     try {
       final detectedFaces = await FaceIdentifier.scanImage(
-          cameraImage: img,
-          controller: _cameraController,
-          performanceMode: FaceDetectorMode.accurate);
+        cameraImage: img,
+        controller: _cameraController,
+      );
 
       // final inputImage = _convertCameraImageToInputImage(img);
       // if (inputImage == null) return;
