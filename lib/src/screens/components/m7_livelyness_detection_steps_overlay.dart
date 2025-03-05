@@ -110,13 +110,21 @@ class LivelynessDetectionStepOverlayState
 
   //* MARK: - Private Methods for Business Logic
   //? =========================================================
-  void _showLoader() => setState(
+  void _showLoader() {
+    if (mounted) {
+      setState(
         () => _isLoading = true,
       );
+    }
+  }
 
-  void _hideLoader() => setState(
+  void _hideLoader() {
+    if (mounted) {
+      setState(
         () => _isLoading = false,
       );
+    }
+  }
 
   //* MARK: - Private Methods for UI Components
   //? =========================================================
