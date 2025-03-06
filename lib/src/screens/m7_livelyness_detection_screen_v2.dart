@@ -203,19 +203,19 @@ class _LivelynessDetectionScreenAndroidState
         total += value;
       });
       final double average = total / symmetry.length;
-      if (average > 250) {
+      if (average > 200) {
         if (!_faceStatusList.contains(FaceStatus.near)) {
           _faceStatusList.add(FaceStatus.near);
           _faceStatusList.remove(FaceStatus.far);
         }
       }
-      if (average < 200) {
+      if (average < 170) {
         if (!_faceStatusList.contains(FaceStatus.far)) {
           _faceStatusList.add(FaceStatus.far);
           _faceStatusList.remove(FaceStatus.near);
         }
       }
-      if (average >= 200 && average <= 250) {
+      if (average >= 170 && average <= 200) {
         _faceStatusList.remove(FaceStatus.far);
         _faceStatusList.remove(FaceStatus.near);
       }
