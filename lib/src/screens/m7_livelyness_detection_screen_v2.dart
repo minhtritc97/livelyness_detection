@@ -203,7 +203,7 @@ class _LivelynessDetectionScreenAndroidState
         total += value;
       });
       final double average = total / symmetry.length;
-      if (average > 200) {
+      if (average > 300) {
         if (!_faceStatusList.contains(FaceStatus.near)) {
           _faceStatusList.add(FaceStatus.near);
           _faceStatusList.remove(FaceStatus.far);
@@ -215,29 +215,29 @@ class _LivelynessDetectionScreenAndroidState
           _faceStatusList.remove(FaceStatus.near);
         }
       }
-      if (average >= 170 && average <= 200) {
+      if (average >= 170 && average <= 300) {
         _faceStatusList.remove(FaceStatus.far);
         _faceStatusList.remove(FaceStatus.near);
       }
-      if ((firstFace.headEulerAngleX ?? 0) > 3) {
+      if ((firstFace.headEulerAngleX ?? 0) > 5) {
         if (!_faceStatusList.contains(FaceStatus.up)) {
           _faceStatusList.add(FaceStatus.up);
           _faceStatusList.remove(FaceStatus.down);
         }
       }
-      if ((firstFace.headEulerAngleX ?? 0) < -3) {
+      if ((firstFace.headEulerAngleX ?? 0) < -5) {
         if (!_faceStatusList.contains(FaceStatus.down)) {
           _faceStatusList.add(FaceStatus.down);
           _faceStatusList.remove(FaceStatus.up);
         }
       }
-      if ((firstFace.headEulerAngleY ?? 0) > 3) {
+      if ((firstFace.headEulerAngleY ?? 0) > 5) {
         if (!_faceStatusList.contains(FaceStatus.left)) {
           _faceStatusList.add(FaceStatus.left);
           _faceStatusList.remove(FaceStatus.right);
         }
       }
-      if ((firstFace.headEulerAngleY ?? 0) < -3) {
+      if ((firstFace.headEulerAngleY ?? 0) < -5) {
         if (!_faceStatusList.contains(FaceStatus.right)) {
           _faceStatusList.add(FaceStatus.right);
           _faceStatusList.remove(FaceStatus.left);
