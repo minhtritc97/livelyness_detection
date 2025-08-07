@@ -30,12 +30,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-dependency_overrides:
-  camera_android_camerax:
-    git:
-      url: https://github.com/flutter/packages
-      path: packages/camera/camera_android_camerax
-      ref: 5963ecdb2dbc5db0a4c3b2bfd9ddaaf542344aee
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter packages.

@@ -42,13 +42,12 @@ packages:
     source: hosted
     version: "0.11.2"
   camera_android_camerax:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/camera/camera_android_camerax"
-      ref: "5963ecdb2dbc5db0a4c3b2bfd9ddaaf542344aee"
-      resolved-ref: "5963ecdb2dbc5db0a4c3b2bfd9ddaaf542344aee"
-      url: "https://github.com/flutter/packages"
-    source: git
+      name: camera_android_camerax
+      sha256: "4b6c1bef4270c39df96402c4d62f2348c3bb2bbaefd0883b9dbd58f426306ad0"
+      url: "https://pub.dev"
+    source: hosted
     version: "0.6.19"
   camera_avfoundation:
     dependency: transitive
@@ -536,4 +535,4 @@ packages:
     version: "6.5.0"
 sdks:
   dart: ">=3.8.0 <4.0.0"
-  flutter: ">=3.27.0"
+  flutter: ">=3.29.0"
