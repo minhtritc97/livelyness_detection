@@ -52,6 +52,15 @@ class _MLivelyness7DetectionScreenState
   static const int kRequiredStableFrames = 30; // ~1 second at 30fps
   static const double kOvalWidthRatio = 0.65;
   static const double kOvalHeightRatio = 0.5;
+  
+  //* MARK: - Two-Step Face Capture (Banking UX)
+  //? =========================================================
+  /// Step 1: Face positioned at normal distance
+  /// Step 2: Face moved closer to camera
+  bool _isStep1Completed = false;
+  bool _isWaitingForCloserFace = false;
+  double? _initialFaceHeight;
+  static const double kCloserFaceThreshold = 1.25; // 25% larger than initial
 
   //* MARK: - Captured Images
   //? =========================================================
@@ -309,48 +318,164 @@ class _MLivelyness7DetectionScreenState
     
     _isFaceInOval = isInHorizontalBounds && isInVerticalBounds;
     
-    // Check face distance based on face width ratio
-    final faceWidthRatio = faceWidth / screenWidth;
-    
-    // Target ratio for good distance (adjust based on your needs)
-    const targetRatio = 0.35;
-    const toleranceRatio = 0.08;
-    
-    if (faceWidthRatio < targetRatio - toleranceRatio) {
-      _faceDistanceStatus = FaceStatus.far;
-      _stableFaceCount = 0;
-      _isFaceStable = false;
-    } else if (faceWidthRatio > targetRatio + toleranceRatio) {
-      _faceDistanceStatus = FaceStatus.near;
-      _stableFaceCount = 0;
-      _isFaceStable = false;
-    } else {
-      _faceDistanceStatus = FaceStatus.good;
+    // Two-step banking UX flow
+    if (!_isStep1Completed) {
+      // Step 1: Normal distance positioning
+      if (_initialFaceHeight == null) {
+        _initialFaceHeight = faceHeight;
+      }
       
-      // Count stable frames when face is in good position and in oval
-      if (_isFaceInOval && !_isProcessingStep) {
-        _stableFaceCount++;
-        if (_stableFaceCount >= kRequiredStableFrames && !_isFaceStable) {
-          _isFaceStable = true;
-          _currentInstruction = 'Giữ nguyên vị trí...';
-        }
-      } else {
+      // Check face distance based on face width ratio
+      final faceWidthRatio = faceWidth / screenWidth;
+      
+      // Target ratio for good distance (adjust based on your needs)
+      const targetRatio = 0.35;
+      const toleranceRatio = 0.08;
+      
+      if (faceWidthRatio < targetRatio - toleranceRatio) {
+        _faceDistanceStatus = FaceStatus.far;
         _stableFaceCount = 0;
         _isFaceStable = false;
+      } else if (faceWidthRatio > targetRatio + toleranceRatio) {
+        _faceDistanceStatus = FaceStatus.near;
+        _stableFaceCount = 0;
+        _isFaceStable = false;
+      } else {
+        _faceDistanceStatus = FaceStatus.good;
+        
+        // Count stable frames when face is in good position and in oval
+        if (_isFaceInOval && !_isProcessingStep) {
+          _stableFaceCount++;
+          if (_stableFaceCount >= kRequiredStableFrames && !_isFaceStable) {
+            _isFaceStable = true;
+            _currentInstruction = 'Giữ nguyên vị trí...';
+            
+            // Start timer to capture step 1 after holding position
+            if (_faceStableTimer == null) {
+              _faceStableTimer = Timer(const Duration(seconds: 2), () {
+                if (mounted && _isFaceStable && !_isStep1Completed) {
+                  _captureStep1Image();
+                }
+              });
+            }
+          }
+        } else {
+          _stableFaceCount = 0;
+          _isFaceStable = false;
+          _faceStableTimer?.cancel();
+          _faceStableTimer = null;
+        }
+      }
+      
+      // Update instruction text for step 1
+      if (!_isFaceInOval) {
+        _currentInstruction = 'Đưa khuôn mặt vào khung hình';
+      } else if (_faceDistanceStatus == FaceStatus.far) {
+        _currentInstruction = 'Đưa khuôn mặt lại gần hơn';
+      } else if (_faceDistanceStatus == FaceStatus.near) {
+        _currentInstruction = 'Đưa khuôn mặt ra xa hơn';
+      } else if (_isFaceStable) {
+        _currentInstruction = 'Giữ nguyên trong 2 giây...';
+      } else {
+        _currentInstruction = 'Giữ khuôn mặt ổn định';
+      }
+    } else if (!_isWaitingForCloserFace) {
+      // Transition to step 2
+      _isWaitingForCloserFace = true;
+      _currentInstruction = 'Đưa khuôn mặt lại gần camera hơn';
+      _faceDistanceStatus = FaceStatus.unknown;
+      _stableFaceCount = 0;
+      _isFaceStable = false;
+    } else {
+      // Step 2: Closer face positioning
+      final faceHeightRatio = faceHeight / (_initialFaceHeight ?? faceHeight);
+      
+      if (faceHeightRatio < kCloserFaceThreshold) {
+        _faceDistanceStatus = FaceStatus.far;
+        _stableFaceCount = 0;
+        _isFaceStable = false;
+        _currentInstruction = 'Đưa khuôn mặt lại gần camera hơn';
+      } else {
+        _faceDistanceStatus = FaceStatus.good;
+        
+        // Count stable frames for closer face
+        if (_isFaceInOval && !_isProcessingStep) {
+          _stableFaceCount++;
+          if (_stableFaceCount >= kRequiredStableFrames && !_isFaceStable) {
+            _isFaceStable = true;
+            _currentInstruction = 'Giữ nguyên trong 2 giây...';
+            
+            // Start timer to capture step 2 after holding position
+            if (_faceStableTimer == null) {
+              _faceStableTimer = Timer(const Duration(seconds: 2), () {
+                if (mounted && _isFaceStable) {
+                  _captureStep2Image();
+                }
+              });
+            }
+          }
+        } else {
+          _stableFaceCount = 0;
+          _isFaceStable = false;
+          _faceStableTimer?.cancel();
+          _faceStableTimer = null;
+        }
+        
+        if (_faceDistanceStatus == FaceStatus.good && !_isFaceStable) {
+          _currentInstruction = 'Giữ khuôn mặt ổn định';
+        }
       }
     }
+  }
+  
+  /// Capture image for step 1 (normal distance)
+  Future<void> _captureStep1Image() async {
+    _faceStableTimer?.cancel();
+    _faceStableTimer = null;
     
-    // Update instruction text
-    if (!_isFaceInOval) {
-      _currentInstruction = 'Đưa khuôn mặt vào khung hình';
-    } else if (_faceDistanceStatus == FaceStatus.far) {
-      _currentInstruction = 'Đưa khuôn mặt lại gần hơn';
-    } else if (_faceDistanceStatus == FaceStatus.near) {
-      _currentInstruction = 'Đưa khuôn mặt ra xa hơn';
-    } else if (_isFaceStable) {
-      _currentInstruction = 'Giữ nguyên...';
-    } else {
-      _currentInstruction = 'Giữ khuôn mặt ổn định';
+    try {
+      if (_cameraController == null || !_cameraController!.value.isInitialized) {
+        return;
+      }
+      await _cameraController?.stopImageStream();
+      final XFile? capturedImage = await _cameraController?.takePicture();
+      if (capturedImage != null && mounted) {
+        _capturedImagePaths.add(capturedImage.path);
+        _isStep1Completed = true;
+        _isFaceStable = false;
+        _stableFaceCount = 0;
+        setState(() {});
+        // Restart live feed for step 2
+        _startLiveFeed();
+      }
+    } catch (e) {
+      debugPrint('Error capturing step 1 image: $e');
+      _startLiveFeed();
+    }
+  }
+  
+  /// Capture image for step 2 (closer distance) and complete detection
+  Future<void> _captureStep2Image() async {
+    _faceStableTimer?.cancel();
+    _faceStableTimer = null;
+    
+    try {
+      if (_cameraController == null || !_cameraController!.value.isInitialized) {
+        return;
+      }
+      await _cameraController?.stopImageStream();
+      final XFile? capturedImage = await _cameraController?.takePicture();
+      if (capturedImage != null && mounted) {
+        _capturedImagePaths.add(capturedImage.path);
+        // Complete the entire detection process
+        _onDetectionCompleted(
+          imgToReturn: capturedImage,
+          didCaptureAutomatically: true,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error capturing step 2 image: $e');
+      _startLiveFeed();
     }
   }
 
