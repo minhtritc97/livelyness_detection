@@ -41,6 +41,23 @@ class _MLivelyness7DetectionScreenState
 
   late final List<LivelynessStepItem> _steps;
 
+  //* MARK: - Face Position & Distance Tracking
+  //? =========================================================
+  FaceStatus _faceDistanceStatus = FaceStatus.unknown;
+  bool _isFaceInOval = false;
+  Timer? _faceStableTimer;
+  bool _isFaceStable = false;
+  String _currentInstruction = '';
+  int _stableFaceCount = 0;
+  static const int kRequiredStableFrames = 30; // ~1 second at 30fps
+  static const double kOvalWidthRatio = 0.65;
+  static const double kOvalHeightRatio = 0.5;
+
+  //* MARK: - Captured Images
+  //? =========================================================
+  List<String?> _capturedImagePaths = [];
+  LivelynessStep? _lastCompletedStep;
+
   //* MARK: - Life Cycle Methods
   //? =========================================================
   @override
@@ -214,6 +231,8 @@ class _MLivelyness7DetectionScreenState
         inputImage.metadata?.rotation != null) {
       if (faces.isEmpty) {
         _resetSteps();
+        _faceDistanceStatus = FaceStatus.unknown;
+        _isFaceInOval = false;
       } else {
         final firstFace = faces.first;
         final painter = FaceDetectorPainter(
@@ -233,6 +252,10 @@ class _MLivelyness7DetectionScreenState
             ),
           ),
         );
+        
+        // Check face distance and position
+        _checkFacePosition(firstFace, inputImage.metadata!.size);
+        
         if (_isProcessingStep &&
             _steps[_stepsKey.currentState?.currentIndex ?? 0].step ==
                 LivelynessStep.blink) {
@@ -259,9 +282,87 @@ class _MLivelyness7DetectionScreenState
     }
   }
 
+  void _checkFacePosition(Face face, Size imageSize) {
+    final faceWidth = face.boundingBox.width;
+    final faceHeight = face.boundingBox.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    
+    // Calculate oval dimensions
+    final ovalWidth = screenWidth * kOvalWidthRatio;
+    final ovalHeight = screenHeight * kOvalHeightRatio;
+    
+    // Get face center position
+    final faceCenterX = face.boundingBox.center.dx;
+    final faceCenterY = face.boundingBox.center.dy;
+    
+    // Screen center
+    final screenCenterX = screenWidth / 2;
+    final screenCenterY = screenHeight / 2;
+    
+    // Check if face is within oval bounds (with some tolerance)
+    final tolerance = 0.15; // 15% tolerance
+    final isInHorizontalBounds = 
+        (faceCenterX - screenCenterX).abs() < (ovalWidth / 2) * (1 + tolerance);
+    final isInVerticalBounds = 
+        (faceCenterY - screenCenterY).abs() < (ovalHeight / 2) * (1 + tolerance);
+    
+    _isFaceInOval = isInHorizontalBounds && isInVerticalBounds;
+    
+    // Check face distance based on face width ratio
+    final faceWidthRatio = faceWidth / screenWidth;
+    
+    // Target ratio for good distance (adjust based on your needs)
+    const targetRatio = 0.35;
+    const toleranceRatio = 0.08;
+    
+    if (faceWidthRatio < targetRatio - toleranceRatio) {
+      _faceDistanceStatus = FaceStatus.far;
+      _stableFaceCount = 0;
+      _isFaceStable = false;
+    } else if (faceWidthRatio > targetRatio + toleranceRatio) {
+      _faceDistanceStatus = FaceStatus.near;
+      _stableFaceCount = 0;
+      _isFaceStable = false;
+    } else {
+      _faceDistanceStatus = FaceStatus.good;
+      
+      // Count stable frames when face is in good position and in oval
+      if (_isFaceInOval && !_isProcessingStep) {
+        _stableFaceCount++;
+        if (_stableFaceCount >= kRequiredStableFrames && !_isFaceStable) {
+          _isFaceStable = true;
+          _currentInstruction = 'Giữ nguyên vị trí...';
+        }
+      } else {
+        _stableFaceCount = 0;
+        _isFaceStable = false;
+      }
+    }
+    
+    // Update instruction text
+    if (!_isFaceInOval) {
+      _currentInstruction = 'Đưa khuôn mặt vào khung hình';
+    } else if (_faceDistanceStatus == FaceStatus.far) {
+      _currentInstruction = 'Đưa khuôn mặt lại gần hơn';
+    } else if (_faceDistanceStatus == FaceStatus.near) {
+      _currentInstruction = 'Đưa khuôn mặt ra xa hơn';
+    } else if (_isFaceStable) {
+      _currentInstruction = 'Giữ nguyên...';
+    } else {
+      _currentInstruction = 'Giữ khuôn mặt ổn định';
+    }
+  }
+
   Future<void> _completeStep({
     required LivelynessStep step,
   }) async {
+    // Capture image at each step completion
+    if (step != _lastCompletedStep) {
+      await _captureStepImage();
+    }
+    _lastCompletedStep = step;
+
     final int indexToUpdate = _steps.indexWhere(
       (p0) => p0.step == step,
     );
@@ -274,6 +375,20 @@ class _MLivelyness7DetectionScreenState
     }
     await _stepsKey.currentState?.nextPage();
     _stopProcessing();
+  }
+
+  Future<void> _captureStepImage() async {
+    try {
+      if (_cameraController == null || !_cameraController!.value.isInitialized) {
+        return;
+      }
+      final XFile? capturedImage = await _cameraController?.takePicture();
+      if (capturedImage != null && mounted) {
+        _capturedImagePaths.add(capturedImage.path);
+      }
+    } catch (e) {
+      debugPrint('Error capturing step image: $e');
+    }
   }
 
   void _takePicture({
@@ -312,11 +427,17 @@ class _MLivelyness7DetectionScreenState
       Navigator.of(context).pop(null);
       return;
     }
+    
+    // Return all captured images from each step
     Navigator.of(context).pop(
-      CapturedImage(
-        imgPath: imgPath,
-        didCaptureAutomatically: didCaptureAutomatically,
-      ),
+      _capturedImagePaths.map((path) {
+        if (path != null && path.isNotEmpty) {
+          return CapturedImage(
+            imgPath: path,
+            didCaptureAutomatically: didCaptureAutomatically,
+          );
+        }
+      }).where((element) => element != null).toList(),
     );
   }
 
@@ -497,6 +618,13 @@ class _MLivelyness7DetectionScreenState
     var scale = size.aspectRatio * _cameraController!.value.aspectRatio;
     if (scale < 1) scale = 1 / scale;
     final Widget cameraView = CameraPreview(_cameraController!);
+    
+    // Calculate oval dimensions for face guide
+    final screenWidth = size.width;
+    final screenHeight = size.height;
+    final ovalWidth = screenWidth * kOvalWidthRatio;
+    final ovalHeight = screenHeight * kOvalHeightRatio;
+    
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -517,9 +645,64 @@ class _MLivelyness7DetectionScreenState
         Center(
           child: cameraView,
         ),
+        // Draw oval frame for face positioning
+        Center(
+          child: CustomPaint(
+            painter: OvalFramePainter(
+              ovalWidth: ovalWidth,
+              ovalHeight: ovalHeight,
+              isFaceInOval: _isFaceInOval,
+              isFaceStable: _isFaceStable,
+              faceDistanceStatus: _faceDistanceStatus,
+            ),
+            size: Size(screenWidth, screenHeight),
+          ),
+        ),
         if (widget.config.showFacialVertices) ...[
           if (_customPaint != null) _customPaint!,
         ],
+        // Display current instruction
+        Positioned(
+          bottom: 100,
+          left: 0,
+          right: 0,
+          child: Column(
+            children: [
+              Text(
+                _currentInstruction.isNotEmpty 
+                    ? _currentInstruction 
+                    : _steps[_stepsKey.currentState?.currentIndex ?? 0].title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (_faceDistanceStatus == FaceStatus.good && _isFaceInOval)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      kRequiredStableFrames ~/ 5,
+                      (index) => Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 2),
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: index < (_stableFaceCount ~/ 5)
+                              ? Colors.green
+                              : Colors.grey.shade700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
         LivelynessDetectionStepOverlay(
           key: _stepsKey,
           steps: _steps,
@@ -560,6 +743,116 @@ class _MLivelyness7DetectionScreenState
         ),
       ],
     );
+  }
+}
+
+/// Custom painter to draw an oval frame for face positioning
+class OvalFramePainter extends CustomPainter {
+  final double ovalWidth;
+  final double ovalHeight;
+  final bool isFaceInOval;
+  final bool isFaceStable;
+  final FaceStatus faceDistanceStatus;
+
+  OvalFramePainter({
+    required this.ovalWidth,
+    required this.ovalHeight,
+    required this.isFaceInOval,
+    required this.isFaceStable,
+    required this.faceDistanceStatus,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0
+      ..color = _getFrameColor();
+    
+    // Draw oval path
+    final Rect ovalRect = Rect.fromCenter(
+      center: Offset(size.width / 2, size.height / 2),
+      width: ovalWidth,
+      height: ovalHeight,
+    );
+    
+    // Draw the oval
+    canvas.drawOval(ovalRect, paint);
+    
+    // Draw corner markers for better visual guidance
+    final markerSize = 20.0;
+    final markerPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4.0
+      ..color = _getFrameColor();
+    
+    // Top-left corner
+    canvas.drawLine(
+      Offset(ovalRect.left, ovalRect.top + markerSize),
+      Offset(ovalRect.left, ovalRect.top),
+      markerPaint,
+    );
+    canvas.drawLine(
+      Offset(ovalRect.left, ovalRect.top),
+      Offset(ovalRect.left + markerSize, ovalRect.top),
+      markerPaint,
+    );
+    
+    // Top-right corner
+    canvas.drawLine(
+      Offset(ovalRect.right, ovalRect.top + markerSize),
+      Offset(ovalRect.right, ovalRect.top),
+      markerPaint,
+    );
+    canvas.drawLine(
+      Offset(ovalRect.right, ovalRect.top),
+      Offset(ovalRect.right - markerSize, ovalRect.top),
+      markerPaint,
+    );
+    
+    // Bottom-left corner
+    canvas.drawLine(
+      Offset(ovalRect.left, ovalRect.bottom - markerSize),
+      Offset(ovalRect.left, ovalRect.bottom),
+      markerPaint,
+    );
+    canvas.drawLine(
+      Offset(ovalRect.left, ovalRect.bottom),
+      Offset(ovalRect.left + markerSize, ovalRect.bottom),
+      markerPaint,
+    );
+    
+    // Bottom-right corner
+    canvas.drawLine(
+      Offset(ovalRect.right, ovalRect.bottom - markerSize),
+      Offset(ovalRect.right, ovalRect.bottom),
+      markerPaint,
+    );
+    canvas.drawLine(
+      Offset(ovalRect.right, ovalRect.bottom),
+      Offset(ovalRect.right - markerSize, ovalRect.bottom),
+      markerPaint,
+    );
+  }
+
+  Color _getFrameColor() {
+    if (!isFaceInOval) {
+      return Colors.white.withOpacity(0.8);
+    } else if (faceDistanceStatus == FaceStatus.far ||
+        faceDistanceStatus == FaceStatus.near) {
+      return Colors.orange;
+    } else if (isFaceStable) {
+      return Colors.green;
+    } else {
+      return Colors.blue.withOpacity(0.8);
+    }
+  }
+
+  @override
+  bool shouldRepaint(OvalFramePainter oldDelegate) {
+    return oldDelegate.isFaceInOval != isFaceInOval ||
+        oldDelegate.isFaceStable != isFaceStable ||
+        oldDelegate.faceDistanceStatus != faceDistanceStatus;
   }
 }
 

@@ -6,7 +6,8 @@ enum FaceStatus {
   up(''),
   down(''),
   right(''),
-  left('');
+  left(''),
+  good('Khuôn mặt đã ổn định');
 
   const FaceStatus(this.text);
   final String text;
