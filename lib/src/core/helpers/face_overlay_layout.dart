@@ -1,4 +1,4 @@
-import 'package:livelyness_detection/index.dart';
+import 'package:livelyness_detection/src/_internal.dart';
 
 /// Single source of truth for the geometry of the face oval.
 ///

@@ -1,4 +1,4 @@
-import 'package:livelyness_detection/index.dart';
+import 'package:livelyness_detection/src/_internal.dart';
 
 /// Thin wrapper around ML Kit's [FaceDetector] plus the pure geometry helpers
 /// used by the banking flow to reason about a face (distance & pose).

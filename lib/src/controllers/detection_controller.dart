@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:livelyness_detection/index.dart';
+import 'package:livelyness_detection/src/_internal.dart';
 
 /// Orchestrates the banking-style face authentication flow.
 ///

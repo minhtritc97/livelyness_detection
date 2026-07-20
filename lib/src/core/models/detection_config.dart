@@ -1,4 +1,4 @@
-import 'package:livelyness_detection/index.dart';
+import 'package:livelyness_detection/src/_internal.dart';
 
 class DetectionConfig {
   /// Types of checks to be added while detecting the face.

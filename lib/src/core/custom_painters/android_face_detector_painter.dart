@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:livelyness_detection/index.dart';
+import 'package:livelyness_detection/src/_internal.dart';
 import 'package:livelyness_detection/livelyness_detection.dart';
 
 class AndroidFaceDetectorPainter extends CustomPainter {

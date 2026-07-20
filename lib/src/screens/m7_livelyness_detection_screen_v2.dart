@@ -1,4 +1,4 @@
-import 'package:livelyness_detection/index.dart';
+import 'package:livelyness_detection/src/_internal.dart';
 
 /// Public entry point kept for backwards compatibility. Wraps
 /// [LivelynessDetectionScreenV2] in a [Scaffold].

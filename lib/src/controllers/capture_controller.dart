@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:livelyness_detection/index.dart';
+import 'package:livelyness_detection/src/_internal.dart';
 
 /// Wraps the camerawesome [CameraState] and exposes a single, awaitable
 /// [takePhoto] so the flow controller stays free of camera plumbing.

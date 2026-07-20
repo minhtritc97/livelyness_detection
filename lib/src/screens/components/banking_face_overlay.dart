@@ -1,4 +1,4 @@
-import 'package:livelyness_detection/index.dart';
+import 'package:livelyness_detection/src/_internal.dart';
 
 /// The full-screen banking-style overlay drawn on top of the camera preview:
 /// a dimmed scrim with an oval cut-out, an oval border, a capture progress ring
