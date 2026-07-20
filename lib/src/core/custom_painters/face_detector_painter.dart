@@ -1,5 +1,5 @@
 //sky_engine/lib/ui/painting.dart
-import 'package:livelyness_detection/index.dart';
+import 'package:livelyness_detection/src/_internal.dart';
 import 'package:livelyness_detection/livelyness_detection.dart';
 
 class FaceDetectorPainter extends CustomPainter {

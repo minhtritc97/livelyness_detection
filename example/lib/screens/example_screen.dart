@@ -1,7 +1,8 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:example/index.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:livelyness_detection/livelyness_detection.dart';
 
 class ExampleScreen extends StatefulWidget {
   const ExampleScreen({super.key});

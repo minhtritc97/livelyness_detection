@@ -1,4 +1,4 @@
-import 'package:livelyness_detection/index.dart';
+import 'package:livelyness_detection/src/_internal.dart';
 
 class PreviewDecoratorWidget extends StatelessWidget {
   final CameraState cameraState;

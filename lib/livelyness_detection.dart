@@ -1,5 +1,12 @@
-import 'package:livelyness_detection/index.dart';
-export './src/index.dart';
+import 'package:flutter/material.dart';
+import 'package:livelyness_detection/src/index.dart';
+
+// Public API — only the types a consumer needs to configure and run detection.
+export 'src/core/enums/livelyness_step.dart';
+export 'src/core/models/caputred_image.dart';
+export 'src/core/models/detection_config.dart';
+export 'src/core/models/detection_threshold.dart';
+export 'src/core/models/livelyness_step_item.dart';
 
 class LivelynessDetection {
   //* MARK: - Converting Package to Singleton

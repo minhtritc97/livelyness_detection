@@ -1,4 +1,4 @@
-import 'package:livelyness_detection/index.dart';
+import 'package:livelyness_detection/src/_internal.dart';
 
 class DetectionConfig {
   /// Types of checks to be added while detecting the face.
@@ -21,6 +21,25 @@ class DetectionConfig {
   /// Icon color of the button that will come after the [maxSecToDetect] is completed.
   final Color? captureButtonColor;
 
+  /// Minimum face-distance metric required to capture the *far* face, expressed
+  /// as a fraction (0..1) of the analysis image's shortest side (the face
+  /// bounding-box width). Below this the face is considered too far/small.
+  /// Default *0.28*.
+  final double farThreshold;
+
+  /// Minimum face-distance metric required to capture the *near* face (the
+  /// "move closer" step), as a fraction (0..1) of the image's shortest side.
+  /// Default *0.50*.
+  final double nearThreshold;
+
+  /// How long a valid far face must be held steady before it is captured.
+  /// Default *2.5s*.
+  final Duration farStableDuration;
+
+  /// How long a valid near face must be held steady before it is captured.
+  /// Default *2s*.
+  final Duration nearStableDuration;
+
   DetectionConfig({
     required this.steps,
     this.startWithInfoScreen = false,
@@ -28,6 +47,10 @@ class DetectionConfig {
     this.allowAfterMaxSec = false,
     this.showFacialVertices = false,
     this.captureButtonColor,
+    this.farThreshold = 0.28,
+    this.nearThreshold = 0.50,
+    this.farStableDuration = const Duration(milliseconds: 2500),
+    this.nearStableDuration = const Duration(milliseconds: 2000),
   }) {
     assert(
       steps.isNotEmpty,

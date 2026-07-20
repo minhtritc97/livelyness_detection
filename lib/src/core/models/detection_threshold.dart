@@ -1,4 +1,4 @@
-import 'package:livelyness_detection/index.dart';
+import 'package:livelyness_detection/src/_internal.dart';
 
 /// Configures the threshold values that will be used while verifying each step.
 abstract class DetectionThreshold extends Equatable {
